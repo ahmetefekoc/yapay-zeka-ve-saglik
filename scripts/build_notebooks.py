@@ -230,7 +230,133 @@ md("""> **Tartışma:** Model bu yorumu nereden biliyor? Yanlış bir şey söyl
 """),
 ]
 
-NOTEBOOKS = {"hafta-01": ("Hafta 1 · İlk Kod", WEEK01)}
+
+# --------------------------------------------------------------------------
+# HAFTA 2 — eGFR fonksiyonu: def, parametre, return, if
+# --------------------------------------------------------------------------
+WEEK02 = [
+md("""# Hafta 2 · eGFR fonksiyonu: bir kodu okumak
+
+**Yapay Zeka ve Sağlık** · Fırat Üniversitesi Tıp Fakültesi
+
+Derste tarayıcıda çalışan bir klinik hesaplayıcı yazdırdık; içindeki `egfrCkdEpi2021` fonksiyonunu okuduk.
+Bu defterde **aynı fonksiyonun Python karşılığı** var. Amaç yazmak değil: `def`, parametre, `return` ve `if`'i tanımak.
+Bu hafta tek işimiz bu."""),
+md("""## 1 · Değişkenler ve tipler: 3 satır
+
+Bir hastanın verisi. Sayı ile metin farklı **tip**tir; `type()` bunu söyler."""),
+code("""kreatinin = 1.1      # mg/dL  → ondalık sayı (float)
+yas = 54             # yıl    → tam sayı (int)
+cinsiyet = "kadın"   # metin  → str
+
+print(type(kreatinin), type(yas), type(cinsiyet))"""),
+md("""Form alanlarından ve dosyalardan gelen her şey **metin** gelir. Metinle hesap yapılmaz; önce sayıya çevrilir."""),
+code("""girdi = "1.1"            # kullanıcı böyle yazdı: bir metin
+# print(girdi * 2)       # deneyin: metni 2 ile "çarpmak" ne verir?
+kreatinin = float(girdi) # tip dönüşümü: metin → ondalık sayı
+print(kreatinin * 2, type(kreatinin))"""),
+md("""## 2 · Fonksiyon: `def` gördüğünüzde
+
+Aşağıdaki blok bir **fonksiyon tanımı**. Parantez içi **parametreler** (formülün girdileri); `return` sonucu geri verir.
+Formül: CKD-EPI 2021 (Inker ve ark., NEJM 2021). Cinsiyet üç yerde işe karışıyor; bulun."""),
+code("""def egfr_hesapla(kreatinin, yas, cinsiyet):
+    \"\"\"CKD-EPI 2021 ile eGFR (mL/dk/1,73 m²). kreatinin mg/dL, yas yıl, cinsiyet 'kadın' | 'erkek'.\"\"\"
+    kadin = cinsiyet == "kadın"                 # mantıksal değer: True / False
+    kappa = 0.7 if kadin else 0.9               # κ
+    alfa = -0.241 if kadin else -0.302          # α
+    oran = kreatinin / kappa
+
+    egfr = 142 * min(oran, 1) ** alfa * max(oran, 1) ** -1.200 * 0.9938 ** yas
+    if kadin:
+        egfr = egfr * 1.012                     # kadın çarpanı
+    return egfr
+
+
+print(round(egfr_hesapla(1.1, 54, "kadın")))
+print(round(egfr_hesapla(1.1, 54, "erkek")))"""),
+md("""> **Okuma sorusu:** Aynı kreatinin ve yaşta kadın ile erkek sonucu neden farklı? Kodda hangi üç satır bunu yapıyor?
+
+## 3 · Koşul: `if` eşikleri
+
+Sayıyı klinik anlama çeviren kısım. KDIGO 2024 evreleri. Sıra önemli: yukarıdan aşağı ilk doğru olan kazanır."""),
+code("""def kdigo_evresi(egfr):
+    \"\"\"eGFR değerini KDIGO G evresine çevirir.\"\"\"
+    if egfr >= 90:
+        return "G1 · normal veya yüksek"
+    elif egfr >= 60:
+        return "G2 · hafif azalmış"
+    elif egfr >= 45:
+        return "G3a · hafif–orta azalmış"
+    elif egfr >= 30:
+        return "G3b · orta–ağır azalmış"
+    elif egfr >= 15:
+        return "G4 · ağır azalmış"
+    else:
+        return "G5 · böbrek yetmezliği"
+
+
+for deger in [95, 72, 59.6, 44, 20, 9]:
+    print(deger, "→", kdigo_evresi(deger))"""),
+md("""> **Okuma sorusu:** 59,6 hangi evreye düştü? Önce yuvarlasaydık ne olurdu? Kılavuz ne diyor?
+
+## 4 · Üç hasta, tek fonksiyon
+
+Fonksiyonun gücü: bir kez tanımla, istediğin kadar çağır."""),
+code("""hastalar = [
+    ("Hasta A", 0.8, 32, "kadın"),
+    ("Hasta B", 1.4, 68, "erkek"),
+    ("Hasta C", 2.6, 75, "kadın"),
+]
+
+for ad, kre, yas, cins in hastalar:
+    e = egfr_hesapla(kre, yas, cins)
+    print(f"{ad}: eGFR {e:5.1f} → {kdigo_evresi(e)}")"""),
+md("""## 5 · Bilerek hata: birim
+
+Laboratuvar kreatinini **µmol/L** raporladı: 97. Fonksiyona olduğu gibi verirsek ne olur?"""),
+code("""print(round(egfr_hesapla(97, 54, "kadın")))   # 97 µmol/L'yi mg/dL sanıyor"""),
+md("""Sonuç saçma ama **kod hata vermedi**. Bu, yazılımın en sinsi hatası: çalışır, yanlış söyler. Çözüm, girdiyi kontrol etmek."""),
+code("""def egfr_guvenli(kreatinin, yas, cinsiyet):
+    \"\"\"Kreatinin 15'ten büyükse µmol/L varsayar ve mg/dL'ye çevirir (÷ 88,4).\"\"\"
+    if kreatinin > 15:
+        print(f"Uyarı: {kreatinin} µmol/L olarak yorumlandı → {kreatinin/88.4:.2f} mg/dL")
+        kreatinin = kreatinin / 88.4
+    return egfr_hesapla(kreatinin, yas, cinsiyet)
+
+
+print(round(egfr_guvenli(97, 54, "kadın")))"""),
+md("""## 6 · Deneyin: VKİ ve bel/boy
+
+Bu iki fonksiyon **bilerek eksik** bırakıldı. `...` yerine formülü yazın ya da bir yapay zeka asistanına yazdırın; sonra okuyun.
+
+- VKİ = kilo / boy²  (boy metre)
+- Bel/boy oranı = bel / boy  (ikisi de cm); hedef < 0,5"""),
+code("""def vki(kilo, boy_m):
+    \"\"\"Vücut kitle indeksi (kg/m²).\"\"\"
+    return ...   # buraya formül
+
+
+def bel_boy(bel_cm, boy_cm):
+    \"\"\"Bel/boy oranı; < 0.5 hedef.\"\"\"
+    return ...   # buraya formül
+
+
+# print(round(vki(72, 1.74), 1))
+# print(round(bel_boy(88, 174), 2))"""),
+md("""## Bugün ne okuduk?
+
+| Kavram | Python'da | Tarayıcı aracında |
+|---|---|---|
+| Değişken | `kreatinin = 1.1` | `const kre = ...` |
+| Tip dönüşümü | `float("1.1")` | `Number("1.1")` |
+| Fonksiyon | `def egfr_hesapla(...)` | `function egfrCkdEpi2021(...)` |
+| Koşul | `if egfr >= 60:` | `if (egfr >= 60)` |
+
+**Eve:** Bölüm 6'yı tamamlayın; kendi VKİ ve bel/boy oranınızı hesaplayın (sonucu paylaşmak zorunda değilsiniz).
+"""),
+]
+
+NOTEBOOKS = {"hafta-01": ("Hafta 1 · İlk Kod", WEEK01), "hafta-02": ("Hafta 2 · eGFR fonksiyonu", WEEK02)}
 
 
 def build(name, title, cells, force=False):

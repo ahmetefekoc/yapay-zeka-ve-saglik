@@ -1,0 +1,203 @@
+---
+week: 2
+title: "Kodlayan Hekim İlk Kez Kodlatıyor: Klinik Hesaplayıcı"
+topic: "Python temelleri I: değişkenler ve veri tipleri; basit klinik hesaplamalar (ör. VKİ)"
+description: "Tek bir istemle yapay zekaya beş hesaplamalı bir klinik araç yazdırıyor, kodunu okuyor, hatasını düzelttiriyoruz. Değişkenler ve veri tipleri bu kodun içinden öğreniliyor."
+module: m1
+semester: 1
+exam: false
+status: hazir
+changeNote: ""
+tags:
+  - "vibe coding"
+  - "Claude Code"
+  - "değişken"
+  - "veri tipi"
+  - "VKİ"
+  - "bel/boy oranı"
+  - "eGFR"
+  - "CHA2DS2-VASc"
+  - "Wells"
+  - "doz hesabı"
+  - "NotebookLM"
+objectives:
+  - "Bir klinik aracı üretken yapay zekaya yazdırmak için bağlam, görev, çıktı biçimi ve kısıt içeren bir istem kurar."
+  - "Üretilen kodda değişken tanımını, tip dönüşümünü (metin → sayı) ve if eşiğini bulup ne yaptığını söyler."
+  - "Bir girdi hatasını (birim karışıklığı) fark eder ve yapay zekaya doğru düzeltmeyi tarif eder."
+  - "VKİ, bel/boy oranı, eGFR, CHA₂DS₂-VASc, Wells DVT ve mg/kg doz hesaplarının ne ölçtüğünü ve sınırlarını açıklar."
+  - "Python'da bir fonksiyon tanımını (def, parametre, return) okur ve eGFR örneğinde çalıştırır."
+tools:
+  - "Claude Code"
+  - "Google Colab"
+  - "NotebookLM"
+notebook:
+  file: notebooks/hafta-02.ipynb
+  title: "Hafta 2 · eGFR fonksiyonu"
+  embed: true
+  placement: inline
+resources:
+  - title: "Inker LA ve ark. New creatinine- and cystatin C–based equations to estimate GFR without race. NEJM 2021"
+    url: "https://doi.org/10.1056/NEJMoa2102953"
+    note: "CKD-EPI 2021 denkleminin kaynağı."
+  - title: "KDIGO 2024 Clinical Practice Guideline for the Evaluation and Management of CKD"
+    url: "https://doi.org/10.1016/j.kint.2023.10.018"
+    note: "eGFR evreleri (G1–G5) ve albüminüri kategorileri."
+  - title: "Lip GYH ve ark. Refining clinical risk stratification for predicting stroke in AF. Chest 2010"
+    url: "https://doi.org/10.1378/chest.09-1584"
+    note: "CHA₂DS₂-VASc skorunun tanımlandığı çalışma."
+  - title: "Van Gelder IC ve ark. 2024 ESC Guidelines for the management of atrial fibrillation. Eur Heart J 2024"
+    url: "https://doi.org/10.1093/eurheartj/ehae176"
+    note: "CHA₂DS₂-VA önerisi."
+  - title: "Wells PS ve ark. Evaluation of D-dimer in the diagnosis of suspected DVT. NEJM 2003"
+    url: "https://doi.org/10.1056/NEJMoa023153"
+    note: "İki düzeyli Wells skoru ve D-dimer algoritması."
+  - title: "Ashwell M, Hsieh SD. Six reasons why the waist-to-height ratio is a rapid and effective global indicator. Int J Food Sci Nutr 2005"
+    url: "https://doi.org/10.1080/09637480500195066"
+    note: "Bel/boy < 0,5 kuralının dayanağı."
+  - title: "Anthropic — Claude Code dokümantasyonu"
+    url: "https://docs.anthropic.com/en/docs/claude-code"
+    note: "Derste kullanılan ajan tabanlı kodlama aracı."
+---
+
+import NotebookEmbed from '@/components/NotebookEmbed.astro';
+
+## Derse Başlamadan Önce
+
+- 1. haftanın defterini bir kez daha çalıştırın; özellikle `NameError` hücresini. Bu hafta hatalarla daha çok karşılaşacağız.
+- Telefonunuzda [Klinik Hesaplayıcı](/araclar/klinik-hesaplayici) sayfasını açıp bir VKİ hesaplayın. Ders sonunda bunun nasıl yazıldığını bileceksiniz.
+- Düşünerek gelin: *Kod yazmayı bilmeyen bir hekim, kod yazdırabilir mi? Yazdırdığı kodun doğru olduğunu nasıl anlar?*
+
+## Ders Notları
+
+### Bugünün iddiası
+
+Geçen hafta "kodu çoğunlukla yapay zeka yazacak" dedik. Bugün bunu yapıyoruz: yansıda, canlı, tek bir istemle, tıp öğrencisinin gerçekten kullanacağı bir araç yazdıracağız. Sonra o kodu birlikte okuyacağız. Ders planındaki "değişkenler, veri tipleri ve basit klinik hesaplamalar" konusu ayrı bir anlatım olarak değil, **bu kodun içinden** işlenecek.
+
+> [!neden] Neden VKİ ile yetinmiyoruz?
+> Tek formül, "kod bir hesap makinesidir" mesajı verir. Beş hesaplama, sekmeler, girdi kontrolü ve kaynak listesi ise gerçek bir aracın nasıl kurulduğunu gösterir: veri girer, dönüştürülür, eşiklerle karşılaştırılır, yorumlanır. Değişken, tip ve koşul kavramlarının hepsi bu akışta doğal olarak görünür.
+
+### Ne yazdıracağız: beş hesaplama
+
+Aşağıdaki beş araç, öğrencilikte ve ilk yıllarda en sık ihtiyaç duyulanlardan seçildi. Her birinin altında formül veya puanlama ve kaynak var; canlı gösteride bu ayrıntılar istemin ikinci yarısı olarak modele verilir.
+
+**1. VKİ ve bel/boy oranı.** VKİ = kilo / boy². WHO sınıfları: 18,5 altı zayıf, 25'e kadar normal, 30'a kadar fazla kilolu, 30 ve üstü obez (I: 30–34,9; II: 35–39,9; III: ≥40). Bel/boy oranı = bel çevresi / boy; 0,5 altı hedef, 0,5–0,59 artmış, 0,6 ve üstü yüksek kardiyometabolik risk. Pratik kural: *bel çevreniz boyunuzun yarısından az olsun*. Neden ikisi birden: VKİ kas kütlesini ve yağ dağılımını ayırt edemez; bel/boy oranı karın yağlanmasını yansıtır ve riski daha iyi öngörür. (WHO 2000; Ashwell & Hsieh 2005; Browning 2010.)
+
+**2. eGFR, CKD-EPI 2021.** Serum kreatinin, yaş ve cinsiyetten glomerüler filtrasyon hızı tahmini; 2021 denklemi ırk katsayısını kaldırdı. KDIGO evreleri: G1 ≥90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G5 &lt;15 mL/dk/1,73 m². Sınırları: tek ölçüm tanı koydurmaz, kas kütlesi uçlarında ve akut böbrek hasarında güvenilmez. (Inker 2021; KDIGO 2024.)
+
+**3. CHA₂DS₂-VASc.** Atriyal fibrilasyonda inme riski: kalp yetersizliği 1, hipertansiyon 1, yaş ≥75 2, diyabet 1, inme/GİA 2, vasküler hastalık 1, yaş 65–74 1, kadın cinsiyet 1. ESC 2024 kılavuzu cinsiyet puanını çıkaran CHA₂DS₂-VA'yı önerir: 2 ve üstü antikoagülasyon, 1 puanda bireysel değerlendirme. (Lip 2010; Friberg 2012; ESC 2024.)
+
+**4. Wells DVT.** On ölçüt, biri eksi puanlı. İki düzeyli yorum: 2 ve üstü "DVT olası"; üç düzeyli: 0 düşük, 1–2 orta, 3 ve üstü yüksek. Sonuca göre D-dimer mi, doğrudan Doppler mi kararı. (Wells 1997, 2003.)
+
+**5. mg/kg doz.** Günlük toplam = kilo × mg/kg; doz başına = toplam / günlük doz sayısı; tavan doz aşılırsa uyar; süspansiyon derişimi verilirse mL'ye çevir. Araç hesap yapar, ilaç önermez; prospektüs ve formüler her zaman son sözü söyler.
+
+> [!uyari] Eğitim aracı, klinik araç değil
+> Yazdıracağımız hesaplayıcı öğrenmek için. Gerçek hasta kararı güncel kılavuz, kurumun onayladığı sistem ve hekim değerlendirmesi ister. Bir aracın "çalışıyor" görünmesi doğru olduğu anlamına gelmez; bugünün ikinci dersi tam olarak bu.
+
+### Derste kullanılan istem
+
+İstem iki parça hâlinde verilir: önce görev ve biçim, sonra formül ayrıntıları. Öğrenciler için ders: **bağlamı siz verirsiniz, model bilmek zorunda değildir; ama verdiğinizi doğru vermek zorundasınız.**
+
+<details>
+<summary>1. parça: görev, biçim, kısıtlar</summary>
+
+```text
+Tıp öğrencileri için Türkçe, tek dosyalık (HTML+CSS+JS, dış bağımlılık yok) bir "Klinik Hesaplayıcı" yap.
+Beş sekme: (1) VKİ ve bel/boy oranı, (2) eGFR CKD-EPI 2021, (3) CHA2DS2-VASc, (4) Wells DVT, (5) mg/kg doz.
+Her sekmede: girdi formu, "Hesapla" düğmesi, sonuç kutusu (değer + sınıf/evre + 2-3 maddelik klinik yorum ve sınırlılık),
+altında kaynak listesi (yazar, dergi, yıl, DOI bağlantısı).
+Girdi hatalarını yakala (boy santimetre yerine metre girilirse uyar; kreatinin µmol/L girilirse uyar).
+Kod okunabilir olsun: her fonksiyonun üstüne bir satır Türkçe açıklama, klinik eşikler if bloklarında açıkça görünsün,
+sihirli sayılar yorumlanmış olsun. Tasarım sade ve mobil uyumlu.
+Formül ve eşik ayrıntıları bir sonraki mesajda. Emin olmadığın bir eşik varsa uydurma, "doğrulanmalı" diye işaretle.
+```
+</details>
+
+<details>
+<summary>2. parça: formüller ve eşikler</summary>
+
+```text
+1) VKİ = kilo(kg) / boy(m)². WHO: <18,5 zayıf; 18,5–24,9 normal; 25–29,9 fazla kilolu; 30–34,9 obez I; 35–39,9 obez II; ≥40 obez III.
+   Bel/boy = bel(cm)/boy(cm): <0,40 düşük; 0,40–0,49 sağlıklı; 0,50–0,59 artmış; ≥0,60 yüksek risk.
+   Bel çevresi: kadın ≥80 artmış / ≥88 yüksek; erkek ≥94 / ≥102.
+2) eGFR CKD-EPI 2021: 142 × min(Scr/κ,1)^α × max(Scr/κ,1)^-1,200 × 0,9938^yaş × (kadınsa 1,012).
+   Kadın κ=0,7 α=-0,241; erkek κ=0,9 α=-0,302. KDIGO: G1 ≥90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G5 <15.
+3) CHA2DS2-VASc: KKY 1, HT 1, yaş ≥75 2, DM 1, inme/GİA/TE 2, vasküler 1, yaş 65–74 1, kadın 1.
+   Yıllık inme riski % (Friberg 2012): 0:0,2 1:0,6 2:2,2 3:3,2 4:4,8 5:7,2 6:9,7 7:11,2 8:10,8 9:12,2.
+   ESC 2024 CHA2DS2-VA: ≥2 antikoagülasyon, 1 düşünülmeli. İkisini de göster.
+4) Wells DVT: aktif kanser 1; paralizi/alçı 1; ≥3 gün yatak veya 12 haftada majör cerrahi 1; derin ven hassasiyeti 1;
+   tüm bacak şiş 1; baldır ≥3 cm fark 1; gode ödem 1; kollateral yüzeyel ven 1; önceki DVT 1; alternatif tanı −2.
+   İki düzey: ≥2 olası. Üç düzey: 0 düşük, 1–2 orta, ≥3 yüksek.
+5) mg/kg: günlük = kilo × mg/kg/gün; doz başına = günlük / doz sayısı; tavan doz aşılırsa uyar; mg/5 mL derişimden mL hesapla.
+```
+</details>
+
+Bu istemle önceden üretilen ve doğrulanan sürüm sitede: [Klinik Hesaplayıcı](/araclar/klinik-hesaplayici). Canlı gösteride üretilen sürümle karşılaştırmak dersin bir parçası; iki çıktı hiçbir zaman birebir aynı olmaz.
+
+### Bilerek hata: birim karışıklığı
+
+Araç hazır olunca VKİ sekmesine boy olarak **1,74** yazıyoruz. İyi bir araç "boy santimetre olmalı" der; demiyorsa VKİ 23 yerine 23.000 çıkar. Kodda `boy` değişkenini bulup soruyoruz: hangi birimde alınıyor, nerede metreye çevriliyor? Sonra ajana düzeltmeyi **biz tarif ediyoruz**: "3'ten küçük girildiyse metre kabul et, santimetreye çevir ve sonuçta belirt." Bu, geçen haftaki `NameError` dersinin devamı: hatayı okuyan, düzeltmeyi doğru isteyebilir.
+
+> [!ornek] Gerçek hayattan
+> Birim karışıklığı yazılım tarihinin en pahalı hatalarından: NASA'nın Mars Climate Orbiter'ı 1999'da bir ekibin İngiliz, diğerinin metrik birim kullanması yüzünden kaybedildi. Klinikte mg/mcg, mL/mg, cm/m karışıklığı ilaç hatalarının klasik nedenidir. Kod bunu sizin yerinize fark etmez; siz söylerseniz kontrol eder.
+
+### Kodu okuma turu: üç durak
+
+Üretilen dosyada üç yere bakıyoruz. Bunlar 2. haftanın resmî konusu.
+
+**Durak 1, değişken ve tip.** `const kilo = Number(form.kilo.value)` gibi bir satır. Form alanından gelen değer bir **metin**dir: `"72"`. `Number` onu **sayı** yapar: `72`. Bu dönüşüm olmadan `"72" / "1.74"` bazı dillerde hata, bazılarında saçma bir sonuç verir. Değişken, bir değeri isimle saklayan kutu; tip, kutudaki şeyin türü: sayı, metin, doğru/yanlış.
+
+**Durak 2, fonksiyon.** `function egfrCkdEpi2021(kreatinin, yas, cinsiyet)`. Parantez içindekiler **parametre**: formülün girdileri. Fonksiyonun sonunda `return` sonucu geri verir. Soru: cinsiyet formüle nerede giriyor? Cevap: κ, α ve kadınlar için 1,012 çarpanı. Python'da aynı şey `def` ile yazılır; defterde göreceğiz.
+
+**Durak 3, eşik.** `if (egfr >= 60) ... else if (egfr >= 45) ...` zinciri. Klinik sınır değerleri koda böyle girer. Soru: eGFR 59,6 hangi evre? Yuvarlayıp 60 mı diyeceğiz? Kod ne yapıyor, kılavuz ne diyor? Küçük bir `if` sırası, klinik anlam taşır.
+
+> [!tanim] Değişken, tip, fonksiyon, koşul
+> **Değişken:** isimli kutu (`kilo`). **Tip:** kutunun içeriğinin türü; sayı (`72`), metin (`"72"`), mantıksal (`true`). **Tip dönüşümü:** `Number("72")`. **Fonksiyon:** isimlendirilmiş, girdi alıp sonuç döndüren kod bloğu (`function` / `def`). **Koşul:** `if` ile eşiklere göre dallanma. Bugün gördüğünüz kodun tamamı bu dört parçadan kurulu.
+
+### Aynı fonksiyon Python'da
+
+Tarayıcıdaki araç JavaScript ile yazıldı; ders dili Python. İkisi arasındaki fark yazım, mantık aynı. Aşağıdaki defterde `egfrCkdEpi2021`'in Python karşılığını çalıştırıyor, `def`, parametre ve `return`'ü görüyoruz. Defter kısa tutuldu; bu hafta tek işimiz bu fonksiyonu okuyup anlamak.
+
+<NotebookEmbed file="notebooks/hafta-02.ipynb" title="Hafta 2 · eGFR fonksiyonu" />
+
+### Kapanış: kaynağa bağlı yapay zeka
+
+Son beş dakika NotebookLM: 1. ve 2. hafta sayfalarını ve bir kılavuz özetini kaynak olarak yükleyip "bu kaynaklardan 5 soruluk quiz yap, her sorunun altına kaynağını yaz" diyoruz. Sohbet botundan farkı: yalnızca yüklediğiniz belgeden cevap verir, kaynağı gösterir, uydurma payı düşer. Ders çalışma aracınız da bu; 24. haftada ayrıntılı işleyeceğiz.
+
+## Temel Kavramlar
+
+- **İstem (prompt)** — Modele verilen görev, bağlam ve kısıt metni. İyi istem: rol, bağlam, görev, çıktı biçimi, kısıt.
+- **Vibe coding** — Kodu satır satır yazmak yerine yapay zekaya tarif edip üretilen kodu okuyarak, test ederek ve düzelttirerek ilerleme. Hekimlik için sorumlu hâli: çıktıyı doğrulamadan kullanmamak.
+- **Değişken** — Bir değeri isimle saklayan kutu: `kilo = 72`.
+- **Veri tipi** — Değerin türü: tam sayı, ondalık, metin, mantıksal. `"72"` metin, `72` sayıdır.
+- **Tip dönüşümü** — Metni sayıya çevirme: `Number("72")` (JavaScript), `float("72")` (Python). Girdi alanlarından gelen her şey metindir.
+- **Fonksiyon** — İsimli, girdi alan, sonuç döndüren kod bloğu. JavaScript'te `function`, Python'da `def`.
+- **Koşul (`if`)** — Eşiklere göre dallanma; klinik sınır değerleri koda buradan girer.
+- **Birim hatası** — Girdinin beklenenden farklı birimde olması (cm/m, mg/dL/µmol/L). En sık ve en tehlikeli hata sınıfı.
+
+## Tıptan Örnekler
+
+- **eGFR'nin ırksız denklemi:** 2021'de CKD-EPI'den ırk katsayısı çıkarıldı; aynı kreatininle bazı hastaların evresi değişti ve nakil listeleri güncellendi. Bir formüldeki tek katsayı, binlerce hastanın kararını etkiler.
+- **CHA₂DS₂-VASc'tan CHA₂DS₂-VA'ya:** ESC 2024 cinsiyet puanını kaldırdı. Hesaplayıcınız hangi kılavuzu uyguluyor? Kod, kılavuz güncellenince güncellenmeli; "çalışıyor" görünmesi yetmez.
+- **Birim karışıklığı:** Pediatrik doz hesabında mg ve mL karışıklığı, süspansiyon derişimi yanlış okununca 5 kat doz hatasına yol açabilir. Araçtaki "tavan doz" uyarısı bu yüzden var.
+- **Wells + D-dimer:** Skor tek başına tanı koymaz; düşük olasılıkta negatif D-dimer DVT'yi dışlar, yüksek olasılıkta doğrudan görüntüleme gerekir. Araç bu algoritmayı yorum satırında verir.
+
+## Uygulama / Etkinlik
+
+1. Derste üretilen sürümle sitedeki [hazır sürümü](/araclar/klinik-hesaplayici) karşılaştırın: aynı istemden çıkan iki kodda hangi farklar var? En az iki fark yazın.
+2. Hazır sürümün kodunu açın ([Kodu oku](https://github.com/drferhatu/yapay-zeka-ve-saglik/blob/main/public/araclar/klinik-hesaplayici.html)) ve üç durağı bulun: bir `Number(...)` dönüşümü, `egfrCkdEpi2021` fonksiyonu, `kdigoEvresi` içindeki `if` zinciri.
+3. Defterdeki `egfr_hesapla` fonksiyonunu üç farklı hasta için çağırın; birinde kreatinini µmol/L girin ve ne olduğunu gözleyin.
+4. Kendi istem denemeniz (isteğe bağlı): Herhangi bir sohbet aracına 1. parça istemi verin, yalnızca VKİ sekmesini isteyin. Çıkan kodda `if` eşiklerini bulup WHO sınıflarıyla karşılaştırın. Yanlış eşik var mı?
+
+> [!not] Ev çalışması (15 dk)
+> Hazır hesaplayıcıda bir hata ya da eksik bulun: yanlış eşik, kötü uyarı, eksik sınırlılık. Bulduğunuzu ve nasıl düzeltilmesi gerektiğini bir cümleyle WhatsApp kanalına değil, derse getirin; 3. haftada birlikte düzelttireceğiz.
+
+## Tartışma Soruları
+
+1. İstemin 2. parçasını (formüller) vermeseydik model eşikleri kendisi bulurdu. Bu neden riskli? Hangi durumda kabul edilebilir olurdu?
+2. Kod "çalışıyor" ve sonuç makul görünüyor. Yine de doğru olmadığına nasıl ikna olursunuz? Hangi üç test ederdiniz?
+3. Hesaplayıcıyı serviste kullanan bir stajyer yanlış sonuçla doz verirse sorumluluk kimde: yazan model, isteyen öğrenci, onaylayan öğretim üyesi, kullanan stajyer?
+4. Değişkenin tipini bilmek hekim için neden önemli? Bir metinle bir sayıyı karıştırmanın klinik karşılığı ne olabilir?
+
+## Haftanın Özeti
+
+Kod yazmayı bilmeyen bir hekim kod yazdırabilir; ama ne istediğini klinik ayrıntısıyla söylemeli, çıkan kodu okuyabilmeli ve hatasını tarif edebilmeli. Beş hesaplamalı bir aracı tek istemle yazdırdık, bir birim hatasını bilerek çıkarıp düzelttirdik ve kodda üç durakta değişken, tip dönüşümü, fonksiyon ve `if` eşiğini okuduk. Aynı fonksiyonu Python'da `def` ile çalıştırdık. Araç sitede; kullanın, hata bulun, getirin.

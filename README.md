@@ -38,7 +38,8 @@ scripts/
   generate_week_files.py  28 haftalık Markdown iskeletini üretir (mevcut dosyaları ezmez)
   validate_content.py     içerik + derleme doğrulaması (haftalar, takvim, defter, kırık bağlantı)
   build_notebooks.py      defter tanımlarından .ipynb üretir, çalıştırır ve HTML'e çevirir
-public/                   favicon, og.png, robots.txt, .nojekyll, qr/ (iletişim kanalları karekodları)
+public/                   favicon, og.png, robots.txt, .nojekyll, qr/ (karekodlar), araclar/ (tek dosyalık araçlar)
+docs/                     öğretim üyesi notları (anket setleri, canlı gösteri senaryoları); siteye girmez
 .github/workflows/deploy.yml  GitHub Pages dağıtımı
 ```
 
@@ -186,6 +187,12 @@ Kanallar `course.json → channels` dizisinde. Bağlantı değişirse karekodu y
 ```bash
 /opt/miniconda3/envs/ferhat_ml/bin/python scripts/make_qr.py
 ```
+
+### Araç eklemek (derste yazdırılan tek dosyalık uygulamalar)
+
+1. Üretilen HTML dosyasını `public/araclar/<ad>.html` olarak kaydedin (dış bağımlılık olmasın, kaynaklar altta).
+2. `src/pages/araclar/<ad>.astro` sarmalayıcısını `klinik-hesaplayici.astro` örneğinden kopyalayın; `src/pages/araclar/index.astro` içindeki `tools` listesine ekleyin.
+3. Haftanın Markdown'ından `/araclar/<ad>` bağlantısı verin.
 
 ### Kurulum rehberi eklemek
 

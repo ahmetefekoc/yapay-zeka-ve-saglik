@@ -1,0 +1,32 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { href, weekHref } from '@/lib/site';
+const tools = [
+  { slug: 'klinik-hesaplayici', title: 'Klinik Hesaplayıcı', week: 2,
+    desc: 'VKİ ve bel/boy oranı, eGFR (CKD-EPI 2021), CHA₂DS₂-VASc, Wells DVT ve mg/kg doz. Tek dosya, telefonda çalışır, kaynaklarıyla.',
+    tags: ['VKİ', 'eGFR', 'CHA₂DS₂-VASc', 'Wells', 'doz'] },
+];
+---
+<BaseLayout title="Araçlar" description="Derste üretken yapay zekaya yazdırılan ve doğrulanan, tıp öğrencisinin işine yarayan küçük araçlar.">
+  <div class="wrap py-14 md:py-20">
+    <SectionHeading eyebrow="Araçlar" title="Derste kodlattığımız araçlar"
+      lede="Her biri bir derste, tek bir istemle üretken yapay zekaya yazdırıldı; formülleri ve kaynakları öğretim üyesi doğruladı. Kodu okumak serbest, hatta ödev." />
+  </div>
+  <div class="wrap pb-24">
+    <ul class="grid gap-5 md:grid-cols-2">
+      {tools.map((t) => (
+        <li>
+          <a href={href(`/araclar/${t.slug}`)} class="group flex h-full flex-col rounded-2xl border border-line bg-white p-6 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift">
+            <p class="eyebrow">Hafta {t.week}</p>
+            <h2 class="mt-2 font-display text-2xl font-semibold text-ink group-hover:text-brand">{t.title}</h2>
+            <p class="mt-2 text-[15px] leading-relaxed text-ink-2">{t.desc}</p>
+            <p class="mt-4 flex flex-wrap gap-1.5">{t.tags.map((x) => <span class="rounded-md bg-paper-2 px-2 py-0.5 text-xs text-ink-2">{x}</span>)}</p>
+            <span class="mt-auto pt-5 text-sm font-semibold text-brand">Aracı aç →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-10 text-sm text-ink-3">Araçlar eğitim amaçlıdır; klinik karar için güncel kılavuz ve hekim değerlendirmesi gerekir. Nasıl yazdırıldığını görmek için <a class="link" href={weekHref(2)}>2. haftaya</a> bakın.</p>
+  </div>
+</BaseLayout>

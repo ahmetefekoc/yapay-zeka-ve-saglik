@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klinik Hesaplayıcı · Yapay Zeka ve Sağlık</title>
+<meta name="description" content="Tıp öğrencileri için tek dosyalık klinik hesaplayıcı: VKİ ve bel/boy oranı, eGFR (CKD-EPI 2021), CHA₂DS₂-VASc, Wells DVT, mg/kg doz.">
+<style>
+  /* ---------- Tasarım: ders sitesiyle uyumlu, tek dosya, dış bağımlılık yok ---------- */
+  :root{--paper:#faf8f4;--paper2:#f2eee6;--ink:#10262e;--ink2:#34515b;--ink3:#6a838b;--line:#e3ddd2;--line2:#cfc6b8;
+        --brand:#0f4c5c;--brand-soft:#dcecef;--accent:#e4572e;--accent-soft:#fbe6de;--ok:#1f7a4d;--ok-soft:#e3f2ea;--warn:#b7791f;--warn-soft:#fdf3e1;--bad:#be3a5a;--bad-soft:#fbe4ea}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  header{border-bottom:1px solid var(--line);background:#fff}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header small{color:var(--ink3);font-size:12px}
+  nav.tabs{display:flex;gap:6px;flex-wrap:wrap;padding:16px 0}
+  nav.tabs button{border:1px solid var(--line2);background:#fff;color:var(--ink2);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+  nav.tabs button[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  section.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:24px}
+  section.panel[data-active]{display:block}
+  .panel h2{margin:0 0 4px;font-size:22px}
+  .lede{margin:0 0 18px;color:var(--ink2);font-size:15px}
+  form{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+  label span.hint{font-weight:400;color:var(--ink3);font-size:12px}
+  input,select{font:inherit;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+  fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;grid-column:1/-1}
+  legend{font-size:13px;font-weight:700;color:var(--ink3);padding:0 6px}
+  .check{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;font-weight:500}
+  .check:last-child{border-bottom:0}
+  .check input{margin-top:3px;width:18px;height:18px}
+  .check b{margin-left:auto;color:var(--ink3);font-weight:600;white-space:nowrap}
+  .actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  button.primary{background:var(--brand);color:#fff;border:0;border-radius:999px;padding:11px 20px;font:inherit;font-weight:700;cursor:pointer}
+  button.primary:hover{background:#0b3a46}
+  button.ghost{background:#fff;border:1px solid var(--line2);border-radius:999px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;color:var(--ink2)}
+  .result{margin-top:18px;border-radius:12px;padding:16px 18px;border-left:5px solid var(--brand);background:var(--brand-soft)}
+  .result[data-level="ok"]{border-color:var(--ok);background:var(--ok-soft)}
+  .result[data-level="warn"]{border-color:var(--warn);background:var(--warn-soft)}
+  .result[data-level="bad"]{border-color:var(--bad);background:var(--bad-soft)}
+  .result[data-level="error"]{border-color:var(--accent);background:var(--accent-soft)}
+  .result .big{font-size:30px;font-weight:800;letter-spacing:-.01em;margin:0}
+  .result .big small{font-size:14px;font-weight:600;color:var(--ink2);margin-left:6px}
+  .result p{margin:6px 0 0;font-size:15px}
+  .result ul{margin:8px 0 0;padding-left:18px;font-size:14px}
+  .refs{margin-top:16px;font-size:12.5px;color:var(--ink3);border-top:1px solid var(--line);padding-top:10px}
+  .refs a{color:var(--brand)}
+  .note{background:var(--paper2);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--ink2);margin-top:14px}
+  footer{padding:24px 0 40px;font-size:12.5px;color:var(--ink3)}
+  .sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Klinik Hesaplayıcı</h1>
+  <small>Yapay Zeka ve Sağlık · Hafta 2 · Eğitim amaçlıdır, klinik karar için tek başına kullanılmaz</small>
+</div></header>
+
+<main class="wrap">
+  <nav class="tabs" role="tablist" aria-label="Hesaplayıcılar">
+    <button role="tab" aria-selected="true" data-tab="vki">VKİ &amp; bel/boy</button>
+    <button role="tab" aria-selected="false" data-tab="egfr">eGFR</button>
+    <button role="tab" aria-selected="false" data-tab="chads">CHA₂DS₂-VASc</button>
+    <button role="tab" aria-selected="false" data-tab="wells">Wells DVT</button>
+    <button role="tab" aria-selected="false" data-tab="doz">mg/kg doz</button>
+  </nav>
+
+  <!-- ===================== 1) VKİ ve bel/boy oranı ===================== -->
+  <section class="panel" id="panel-vki" data-active>
+    <h2>Vücut kitle indeksi ve bel/boy oranı</h2>
+    <p class="lede">VKİ toplam ağırlığı, bel/boy oranı karın yağlanmasını yansıtır. İkisini birlikte okuyun; bel/boy oranı kardiyometabolik riski VKİ'den daha iyi öngörür.</p>
+    <form id="form-vki">
+      <label>Kilo <span class="hint">kg</span><input name="kilo" type="number" step="0.1" min="20" max="400" required placeholder="72"></label>
+      <label>Boy <span class="hint">cm</span><input name="boy" type="number" step="0.01" min="0.5" max="250" required placeholder="170"></label>
+      <label>Bel çevresi <span class="hint">cm, isteğe bağlı</span><input name="bel" type="number" step="0.1" min="40" max="250" placeholder="88"></label>
+      <label>Cinsiyet <span class="hint">bel eşikleri için</span><select name="cins"><option value="k">Kadın</option><option value="e">Erkek</option></select></label>
+      <div class="actions"><button class="primary" type="submit">Hesapla</button><button class="ghost" type="reset">Temizle</button></div>
+    </form>
+    <div class="result" id="sonuc-vki" hidden aria-live="polite"></div>
+    <div class="refs">Kaynaklar: WHO. Obesity: preventing and managing the global epidemic. TRS 894, 2000 (VKİ sınıfları). ·
+      Ashwell M, Hsieh SD. <a href="https://doi.org/10.1080/09637480500195066" target="_blank" rel="noopener">Int J Food Sci Nutr 2005</a> (bel/boy &lt; 0,5 hedefi). ·
+      Browning LM ve ark. <a href="https://doi.org/10.1017/S0954422410000144" target="_blank" rel="noopener">Nutr Res Rev 2010</a> (sistematik derleme). ·
+      Bel çevresi eşikleri: WHO 2008 / IDF 2006.</div>
+  </section>
+
+  <!-- ===================== 2) eGFR (CKD-EPI 2021) ===================== -->
+  <section class="panel" id="panel-egfr">
+    <h2>Tahmini glomerüler filtrasyon hızı (eGFR)</h2>
+    <p class="lede">CKD-EPI 2021 kreatinin denklemi; ırk katsayısı içermez. Sonuç mL/dk/1,73 m² cinsindendir ve KDIGO G evresiyle birlikte verilir.</p>
+    <form id="form-egfr">
+      <label>Serum kreatinin <span class="hint">mg/dL</span><input name="kre" type="number" step="0.01" min="0.1" max="3000" required placeholder="1.1"></label>
+      <label>Yaş <span class="hint">yıl, ≥18</span><input name="yas" type="number" min="18" max="120" required placeholder="54"></label>
+      <label>Cinsiyet<select name="cins"><option value="k">Kadın</option><option value="e">Erkek</option></select></label>
+      <div class="actions"><button class="primary" type="submit">Hesapla</button><button class="ghost" type="reset">Temizle</button></div>
+    </form>
+    <div class="result" id="sonuc-egfr" hidden aria-live="polite"></div>
+    <div class="note">Tek bir kreatinin değeri anlık böbrek fonksiyonunu gösterir; kronik böbrek hastalığı tanısı için ≥3 ay süren düşüklük ve/veya albüminüri gerekir. Kas kütlesi uçlarında (kaşeksi, vücut geliştirme) ve akut böbrek hasarında denklem güvenilmez.</div>
+    <div class="refs">Kaynaklar: Inker LA ve ark. New Creatinine- and Cystatin C–Based Equations to Estimate GFR without Race. <a href="https://doi.org/10.1056/NEJMoa2102953" target="_blank" rel="noopener">N Engl J Med 2021;385:1737-49</a>. ·
+      KDIGO 2024 Clinical Practice Guideline for CKD. <a href="https://doi.org/10.1016/j.kint.2023.10.018" target="_blank" rel="noopener">Kidney Int 2024;105(4S):S117-S314</a>.</div>
+  </section>
+
+  <!-- ===================== 3) CHA2DS2-VASc ===================== -->
+  <section class="panel" id="panel-chads">
+    <h2>CHA₂DS₂-VASc skoru</h2>
+    <p class="lede">Atriyal fibrilasyonda yıllık inme/sistemik emboli riskini kestirir ve antikoagülasyon kararına yön verir. Toplam 0–9 puan.</p>
+    <form id="form-chads">
+      <fieldset><legend>Ölçütler</legend>
+        <label class="check"><input type="checkbox" name="c" value="1">Konjestif kalp yetersizliği / sol ventrikül disfonksiyonu<b>+1</b></label>
+        <label class="check"><input type="checkbox" name="h" value="1">Hipertansiyon<b>+1</b></label>
+        <label class="check"><input type="checkbox" name="d" value="1">Diabetes mellitus<b>+1</b></label>
+        <label class="check"><input type="checkbox" name="s" value="2">İnme / GİA / tromboembolizm öyküsü<b>+2</b></label>
+        <label class="check"><input type="checkbox" name="v" value="1">Vasküler hastalık (Mİ, PAH, aort plağı)<b>+1</b></label>
+      </fieldset>
+      <label>Yaş <span class="hint">yıl</span><input name="yas" type="number" min="18" max="120" required placeholder="72"></label>
+      <label>Cinsiyet<select name="cins"><option value="e">Erkek</option><option value="k">Kadın</option></select></label>
+      <div class="actions"><button class="primary" type="submit">Hesapla</button><button class="ghost" type="reset">Temizle</button></div>
+    </form>
+    <div class="result" id="sonuc-chads" hidden aria-live="polite"></div>
+    <div class="note">ESC 2024 AF kılavuzu, cinsiyet puanını çıkaran CHA₂DS₂-VA'yı önerir: erkek ≥2 / kadın ≥3 yerine herkes için ≥2 puanda antikoagülasyon, 1 puanda düşünülmeli. Sonuçta iki skor birlikte gösterilir. Yıllık risk yüzdeleri kohort tahminidir; bireysel karar kanama riski (HAS-BLED) ve hasta tercihiyle birlikte verilir.</div>
+    <div class="refs">Kaynaklar: Lip GYH ve ark. <a href="https://doi.org/10.1378/chest.09-1584" target="_blank" rel="noopener">Chest 2010;137:263-72</a> (skorun tanımı). ·
+      Friberg L ve ark. <a href="https://doi.org/10.1093/eurheartj/ehr488" target="_blank" rel="noopener">Eur Heart J 2012;33:1500-10</a> (yıllık risk oranları, İsveç kohortu). ·
+      Van Gelder IC ve ark. 2024 ESC Guidelines for AF. <a href="https://doi.org/10.1093/eurheartj/ehae176" target="_blank" rel="noopener">Eur Heart J 2024;45:3314-414</a>.</div>
+  </section>
+
+  <!-- ===================== 4) Wells DVT ===================== -->
+  <section class="panel" id="panel-wells">
+    <h2>Wells derin ven trombozu skoru</h2>
+    <p class="lede">Alt ekstremite DVT ön-test olasılığını sınıflar; D-dimer ve Doppler USG kararını yönlendirir.</p>
+    <form id="form-wells">
+      <fieldset><legend>Ölçütler</legend>
+        <label class="check"><input type="checkbox" value="1">Aktif kanser (tedavi altında, son 6 ay veya palyatif)<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Paralizi, parezi veya alt ekstremitede yakın zamanda alçı<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Son 3 günde ≥3 gün yatağa bağımlılık veya son 12 haftada majör cerrahi<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Derin venöz sistem boyunca lokalize hassasiyet<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Tüm bacakta şişlik<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Baldır çevresi karşı tarafa göre ≥3 cm fazla (tuberositas tibia 10 cm altı)<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Semptomatik bacakta gode bırakan ödem<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Kollateral yüzeyel venler (variköz olmayan)<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="1">Daha önce belgelenmiş DVT<b>+1</b></label>
+        <label class="check"><input type="checkbox" value="-2">DVT kadar veya daha olası alternatif tanı<b>−2</b></label>
+      </fieldset>
+      <div class="actions"><button class="primary" type="submit">Hesapla</button><button class="ghost" type="reset">Temizle</button></div>
+    </form>
+    <div class="result" id="sonuc-wells" hidden aria-live="polite"></div>
+    <div class="refs">Kaynaklar: Wells PS ve ark. <a href="https://doi.org/10.1016/S0140-6736(97)08140-3" target="_blank" rel="noopener">Lancet 1997;350:1795-8</a> (üç düzeyli skor). ·
+      Wells PS ve ark. <a href="https://doi.org/10.1056/NEJMoa023153" target="_blank" rel="noopener">N Engl J Med 2003;349:1227-35</a> (iki düzeyli skor ve D-dimer algoritması).</div>
+  </section>
+
+  <!-- ===================== 5) mg/kg doz ===================== -->
+  <section class="panel" id="panel-doz">
+    <h2>Ağırlığa göre doz (mg/kg)</h2>
+    <p class="lede">Özellikle pediatride ilaç dozu kilograma göre verilir. Günlük toplam dozu, doz başına miktarı ve süspansiyon hacmini hesaplar.</p>
+    <form id="form-doz">
+      <label>Ağırlık <span class="hint">kg</span><input name="kilo" type="number" step="0.1" min="0.5" max="300" required placeholder="18"></label>
+      <label>Doz <span class="hint">mg/kg/gün</span><input name="mgkg" type="number" step="0.1" min="0.01" max="500" required placeholder="50"></label>
+      <label>Günde kaç doz<select name="bolme"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
+      <label>Günlük tavan doz <span class="hint">mg, isteğe bağlı</span><input name="tavan" type="number" step="1" min="1" placeholder="3000"></label>
+      <label>Süspansiyon derişimi <span class="hint">mg / 5 mL, isteğe bağlı</span><input name="deris" type="number" step="1" min="1" placeholder="250"></label>
+      <div class="actions"><button class="primary" type="submit">Hesapla</button><button class="ghost" type="reset">Temizle</button></div>
+    </form>
+    <div class="result" id="sonuc-doz" hidden aria-live="polite"></div>
+    <div class="note">Örnek: amoksisilin 50 mg/kg/gün, 3 doza bölünmüş, 250 mg/5 mL süspansiyon. Her ilacın kendi doz aralığı, tavanı ve böbrek/karaciğer ayarı vardır; her zaman güncel prospektüs veya formüler ile doğrulayın. Bu araç hesap yapar, ilaç önermez.</div>
+    <div class="refs">Kaynaklar: Genel farmakoloji ilkesi (doz = ağırlık × mg/kg). Örnek doz aralığı için: BNF for Children, güncel baskı; Türkiye ilaç prospektüsleri (<a href="https://www.titck.gov.tr/" target="_blank" rel="noopener">TİTCK</a>).</div>
+  </section>
+</main>
+
+<footer class="wrap">Bu sayfa Yapay Zeka ve Sağlık dersinin 2. haftasında, tek bir istemle üretken yapay zekaya yazdırılmış ve öğretim üyesi tarafından kaynaklarıyla doğrulanmıştır. Hesaplamalar eğitim amaçlıdır; klinik kararlar güncel kılavuz ve hekim değerlendirmesi gerektirir.</footer>
+
+<script>
+/* =====================================================================
+   Kodlayan hekim için okuma rehberi:
+   - "function" ile başlayan bloklar birer fonksiyon tanımıdır (Python'daki def).
+   - const/let ile başlayan satırlar değişken tanımlar.
+   - if / else if / else: eşiklere göre dallanma. Klinik sınır değerleri burada.
+   - Number(...) metni sayıya çevirir (tip dönüşümü). Girdi alanları metin döner!
+   ===================================================================== */
+
+// ---------- Sekmeler ----------
+document.querySelectorAll('nav.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', 'false'));
+    document.querySelectorAll('section.panel').forEach(p => p.removeAttribute('data-active'));
+    btn.setAttribute('aria-selected', 'true');
+    document.getElementById('panel-' + btn.dataset.tab).setAttribute('data-active', '');
+  });
+});
+
+// ---------- Ortak yardımcılar ----------
+function goster(id, seviye, html) {            // sonucu kutuya yazar
+  const kutu = document.getElementById(id);
+  kutu.dataset.level = seviye;                  // ok | warn | bad | error | (boş: nötr)
+  kutu.innerHTML = html;
+  kutu.hidden = false;
+}
+function sayi(form, ad) {                        // form alanını sayıya çevirir; boşsa null
+  const v = form.elements[ad].value.trim();
+  return v === '' ? null : Number(v);
+}
+function yuvarla(x, basamak = 1) { return Number(x.toFixed(basamak)); }
+
+// ---------- 1) VKİ ve bel/boy ----------
+function vkiSinifi(vki) {
+  if (vki < 18.5) return ['Zayıf', 'warn'];
+  if (vki < 25)   return ['Normal', 'ok'];
+  if (vki < 30)   return ['Fazla kilolu', 'warn'];
+  if (vki < 35)   return ['Obez, sınıf I', 'bad'];
+  if (vki < 40)   return ['Obez, sınıf II', 'bad'];
+  return ['Obez, sınıf III', 'bad'];
+}
+function belBoyYorumu(oran) {
+  if (oran < 0.40) return ['Düşük: zayıflık açısından değerlendirin', 'warn'];
+  if (oran < 0.50) return ['Sağlıklı aralık (hedef < 0,50)', 'ok'];
+  if (oran < 0.60) return ['Artmış kardiyometabolik risk', 'warn'];
+  return ['Yüksek kardiyometabolik risk', 'bad'];
+}
+document.getElementById('form-vki').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const kilo = sayi(f, 'kilo');
+  const boyCm = sayi(f, 'boy');
+  const bel = sayi(f, 'bel');
+  const cins = f.elements.cins.value;
+
+  if (boyCm < 100) return goster('sonuc-vki', 'error', '<p class="big">Boy santimetre olmalı</p><p>Örn. 1,70 m için 170 yazın.</p>');
+  const boyM = boyCm / 100;                     // birim dönüşümü: cm → m
+  const vki = kilo / (boyM * boyM);
+  const [sinif, seviye] = vkiSinifi(vki);
+
+  let html = `<p class="big">VKİ ${yuvarla(vki)}<small>kg/m²</small></p><p><strong>${sinif}</strong> (WHO sınıflaması).</p>`;
+  let genelSeviye = seviye;
+
+  if (bel) {
+    const oran = bel / boyCm;
+    const [yorum, s2] = belBoyYorumu(oran);
+    const esikArtmis = cins === 'e' ? 94 : 80;   // IDF/WHO bel çevresi eşikleri (cm)
+    const esikYuksek = cins === 'e' ? 102 : 88;
+    let belNot = bel >= esikYuksek ? `bel çevresi ≥${esikYuksek} cm: yüksek risk` :
+                 bel >= esikArtmis ? `bel çevresi ≥${esikArtmis} cm: artmış risk` : 'bel çevresi eşik altında';
+    html += `<p><strong>Bel/boy oranı ${yuvarla(oran, 2)}</strong> · ${yorum} · ${belNot}.</p>`;
+    html += `<ul><li>Pratik kural: <em>bel çevreniz boyunuzun yarısından az olsun.</em></li>
+             <li>VKİ normal ama bel/boy ≥ 0,50 ise "normal kilolu santral obezite" düşünün; risk VKİ'nin gösterdiğinden yüksektir.</li></ul>`;
+    if (s2 === 'bad' || (s2 === 'warn' && seviye === 'ok')) genelSeviye = s2;
+  } else {
+    html += `<p>Bel çevresini de girerseniz karın yağlanması için bel/boy oranı hesaplanır.</p>`;
+  }
+  html += `<ul><li>Sınırlılık: VKİ kas kütlesini, yaşı ve etnik farkları ayırt edemez (Asya kökenlilerde eşikler daha düşüktür).</li></ul>`;
+  goster('sonuc-vki', genelSeviye, html);
+});
+
+// ---------- 2) eGFR: CKD-EPI 2021 ----------
+function egfrCkdEpi2021(kreatinin, yas, cinsiyet) {
+  // Inker ve ark., NEJM 2021. Kadın: κ=0,7 α=-0,241 çarpan 1,012 · Erkek: κ=0,9 α=-0,302
+  const kadin = cinsiyet === 'k';
+  const kappa = kadin ? 0.7 : 0.9;
+  const alfa  = kadin ? -0.241 : -0.302;
+  const oran  = kreatinin / kappa;
+  let egfr = 142 * Math.pow(Math.min(oran, 1), alfa) * Math.pow(Math.max(oran, 1), -1.200) * Math.pow(0.9938, yas);
+  if (kadin) egfr *= 1.012;
+  return egfr;
+}
+function kdigoEvresi(egfr) {
+  if (egfr >= 90) return ['G1', 'Normal veya yüksek', 'ok'];
+  if (egfr >= 60) return ['G2', 'Hafif azalmış', 'ok'];
+  if (egfr >= 45) return ['G3a', 'Hafif–orta azalmış', 'warn'];
+  if (egfr >= 30) return ['G3b', 'Orta–ağır azalmış', 'warn'];
+  if (egfr >= 15) return ['G4', 'Ağır azalmış', 'bad'];
+  return ['G5', 'Böbrek yetmezliği', 'bad'];
+}
+document.getElementById('form-egfr').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const kre = sayi(f, 'kre'), yas = sayi(f, 'yas'), cins = f.elements.cins.value;
+  if (kre > 15) return goster('sonuc-egfr', 'error', '<p class="big">Kreatinin mg/dL olmalı</p><p>µmol/L girdiyseniz 88,4\'e bölün (örn. 97 µmol/L ≈ 1,1 mg/dL).</p>');
+  const egfr = egfrCkdEpi2021(kre, yas, cins);
+  const [evre, tanim, seviye] = kdigoEvresi(egfr);
+  goster('sonuc-egfr', seviye, `<p class="big">eGFR ${Math.round(egfr)}<small>mL/dk/1,73 m²</small></p>
+    <p><strong>KDIGO ${evre}</strong> · ${tanim}.</p>
+    <ul><li>eGFR &lt; 60 ise doz ayarı gerektiren ilaçları gözden geçirin; &lt; 30'da nefroloji değerlendirmesi.</li>
+        <li>Evreleme için albüminüri (A1–A3) ile birlikte yorumlayın; tek ölçüm tanı koydurmaz.</li></ul>`);
+});
+
+// ---------- 3) CHA2DS2-VASc ----------
+const YILLIK_INME_RISKI = [0.2, 0.6, 2.2, 3.2, 4.8, 7.2, 9.7, 11.2, 10.8, 12.2]; // Friberg 2012, %/yıl, indeks = skor
+document.getElementById('form-chads').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const yas = sayi(f, 'yas');
+  const kadin = f.elements.cins.value === 'k';
+  let puan = 0;
+  ['c', 'h', 'd', 's', 'v'].forEach(ad => { if (f.elements[ad].checked) puan += Number(f.elements[ad].value); });
+  if (yas >= 75) puan += 2; else if (yas >= 65) puan += 1;   // yaş: 65–74 → 1, ≥75 → 2
+  const vaPuan = puan;                                       // CHA2DS2-VA (cinsiyetsiz)
+  if (kadin) puan += 1;                                      // CHA2DS2-VASc: kadın +1
+  const risk = YILLIK_INME_RISKI[Math.min(puan, 9)];
+  let oneri, seviye;
+  if (vaPuan >= 2)      { oneri = 'Oral antikoagülasyon önerilir (ESC 2024, CHA₂DS₂-VA ≥ 2).'; seviye = 'bad'; }
+  else if (vaPuan === 1){ oneri = 'Antikoagülasyon düşünülmeli; bireysel değerlendirme (CHA₂DS₂-VA = 1).'; seviye = 'warn'; }
+  else                  { oneri = 'Düşük risk; antitrombotik tedavi önerilmez (CHA₂DS₂-VA = 0).'; seviye = 'ok'; }
+  goster('sonuc-chads', seviye, `<p class="big">CHA₂DS₂-VASc ${puan}<small>/ 9</small></p>
+    <p>CHA₂DS₂-VA (cinsiyetsiz, ESC 2024): <strong>${vaPuan}</strong> · Yaklaşık yıllık inme riski: <strong>%${risk}</strong> (kohort tahmini).</p>
+    <p>${oneri}</p><ul><li>Kanama riskini (HAS-BLED) ve düzeltilebilir faktörleri birlikte değerlendirin; skor tedaviyi tek başına belirlemez.</li></ul>`);
+});
+
+// ---------- 4) Wells DVT ----------
+document.getElementById('form-wells').addEventListener('submit', e => {
+  e.preventDefault();
+  let puan = 0;
+  e.target.querySelectorAll('input[type=checkbox]:checked').forEach(k => puan += Number(k.value));
+  const ikiDuzey = puan >= 2 ? 'DVT olası' : 'DVT olası değil';
+  let ucDuzey, seviye, adim;
+  if (puan >= 3)      { ucDuzey = 'Yüksek olasılık (~%53)'; seviye = 'bad';  adim = 'Doğrudan kompresyon USG; D-dimer negatif olsa da görüntüleme önerilir.'; }
+  else if (puan >= 1) { ucDuzey = 'Orta olasılık (~%17)';  seviye = 'warn'; adim = 'D-dimer; pozitifse USG.'; }
+  else                { ucDuzey = 'Düşük olasılık (~%5)';  seviye = 'ok';   adim = 'D-dimer; negatifse DVT dışlanabilir.'; }
+  goster('sonuc-wells', seviye, `<p class="big">Wells ${puan}</p>
+    <p>İki düzeyli: <strong>${ikiDuzey}</strong> (eşik ≥ 2) · Üç düzeyli: <strong>${ucDuzey}</strong>.</p>
+    <p>Önerilen adım: ${adim}</p>
+    <ul><li>Skor gebelerde, hastane yatışı olanlarda ve antikoagülan kullananlarda daha az güvenilirdir.</li></ul>`);
+});
+
+// ---------- 5) mg/kg doz ----------
+document.getElementById('form-doz').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  const kilo = sayi(f, 'kilo'), mgkg = sayi(f, 'mgkg'), bolme = sayi(f, 'bolme');
+  const tavan = sayi(f, 'tavan'), deris = sayi(f, 'deris');
+  let gunluk = kilo * mgkg;                                  // temel formül: mg/gün = kg × mg/kg
+  let uyari = '';
+  if (tavan && gunluk > tavan) { uyari = `Hesaplanan ${yuvarla(gunluk, 0)} mg günlük tavanı (${tavan} mg) aşıyor; tavan doz uygulandı.`; gunluk = tavan; }
+  const dozBasina = gunluk / bolme;
+  let html = `<p class="big">${yuvarla(dozBasina, 0)} mg<small>× ${bolme} / gün (toplam ${yuvarla(gunluk, 0)} mg/gün)</small></p>`;
+  if (deris) {
+    const mlBasina = dozBasina / (deris / 5);              // derişim mg/5 mL → mg/mL
+    html += `<p>Süspansiyon ${deris} mg/5 mL: <strong>${yuvarla(mlBasina, 1)} mL</strong> her dozda.</p>`;
+  }
+  if (uyari) html += `<p><strong>Dikkat:</strong> ${uyari}</p>`;
+  html += `<ul><li>Hesap eğitim amaçlıdır. İlacın aralığı, tavanı, böbrek/karaciğer ayarı ve yaş kısıtları için prospektüs veya formüleri doğrulayın.</li></ul>`;
+  goster('sonuc-doz', uyari ? 'warn' : 'ok', html);
+});
+</script>
+</body>
+</html>
