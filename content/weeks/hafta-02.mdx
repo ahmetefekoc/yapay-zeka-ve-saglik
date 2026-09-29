@@ -2,7 +2,7 @@
 week: 2
 title: "Kodlayan Hekim İlk Kez Kodlatıyor: Klinik Hesaplayıcı"
 topic: "Python temelleri I: değişkenler ve veri tipleri; basit klinik hesaplamalar (ör. VKİ)"
-description: "Tek bir istemle yapay zekaya beş hesaplamalı bir klinik araç yazdırıyor, kodunu okuyor, hatasını düzelttiriyoruz. Değişkenler ve veri tipleri bu kodun içinden öğreniliyor."
+description: "Bu hafta yapay zekaya, tıp öğrencisinin gerçekten kullanacağı beş hesaplamalı bir klinik araç yazdırıyoruz; sonra o kodu birlikte okuyor, içine bilerek bir hata sokup düzelttiriyoruz. Değişkenleri ve veri tiplerini de bu kodun içinde tanıyacağız."
 module: m1
 semester: 1
 exam: false
@@ -63,42 +63,48 @@ import NotebookEmbed from '@/components/NotebookEmbed.astro';
 
 ## Derse Başlamadan Önce
 
-- 1. haftanın defterini bir kez daha çalıştırın; özellikle `NameError` hücresini. Bu hafta hatalarla daha çok karşılaşacağız.
-- Telefonunuzda [Klinik Hesaplayıcı](/araclar/klinik-hesaplayici) sayfasını açıp bir VKİ hesaplayın. Ders sonunda bunun nasıl yazıldığını bileceksiniz.
-- Düşünerek gelin: *Kod yazmayı bilmeyen bir hekim, kod yazdırabilir mi? Yazdırdığı kodun doğru olduğunu nasıl anlar?*
+Geçen haftanın defterini bir kez daha açıp baştan sona çalıştırmanızı istiyorum; özellikle o bilerek hata veren `NameError` hücresinde biraz oyalanın, çünkü bu hafta hata mesajlarıyla daha sık karşılaşacağız ve onlardan korkmamanız işimizi kolaylaştıracak.
+
+Bir de telefonunuzdan [Klinik Hesaplayıcı](/araclar/klinik-hesaplayici) sayfasını açıp kendi VKİ'nizi hesaplayın. Şimdilik sadece kullanan tarafta olun; ders bittiğinde bu aracın nasıl yazıldığını, hatta bir benzerini nasıl yazdıracağınızı biliyor olacaksınız.
+
+Derse gelirken şu soruyu da aklınızın bir köşesinde tutun: kod yazmayı bilmeyen bir hekim, birine kod yazdırabilir mi? Yazdırdıysa, çıkan şeyin doğru olduğunu nereden anlar?
 
 ## Ders Notları
 
-### Bugünün iddiası
+### Geçen haftadan bugüne
 
-Geçen hafta "kodu çoğunlukla yapay zeka yazacak" dedik. Bugün bunu yapıyoruz: yansıda, canlı, tek bir istemle, tıp öğrencisinin gerçekten kullanacağı bir araç yazdıracağız. Sonra o kodu birlikte okuyacağız. Ders planındaki "değişkenler, veri tipleri ve basit klinik hesaplamalar" konusu ayrı bir anlatım olarak değil, **bu kodun içinden** işlenecek.
+Birinci haftada size bir şey söz vermiştim: bu derste kodun büyük kısmını yapay zeka yazacak, sizin işiniz onu doğru istemek, okumak ve doğrulamak olacak demiştim. Bugün bu sözü yerine getiriyoruz. Yansıda, canlı olarak, tek bir istemle, bir tıp öğrencisinin gerçekten işine yarayacak bir araç yazdıracağız ve sonra o kodu birlikte okuyacağız.
 
-> [!neden] Neden VKİ ile yetinmiyoruz?
-> Tek formül, "kod bir hesap makinesidir" mesajı verir. Beş hesaplama, sekmeler, girdi kontrolü ve kaynak listesi ise gerçek bir aracın nasıl kurulduğunu gösterir: veri girer, dönüştürülür, eşiklerle karşılaştırılır, yorumlanır. Değişken, tip ve koşul kavramlarının hepsi bu akışta doğal olarak görünür.
+Ders planında bu haftanın konusu "değişkenler, veri tipleri ve basit klinik hesaplamalar" olarak geçiyor. Bunları ayrı ayrı tanımlayıp örnek verip geçebilirdik; ama bence bir kavramı, işe yarayan bir şeyin içinde gördüğünüzde çok daha kalıcı öğreniyorsunuz. O yüzden bugün değişkenin ne olduğunu tahtada değil, kendi elimizle yazdırdığımız hesaplayıcının kodunda göreceğiz.
 
-### Ne yazdıracağız: beş hesaplama
+> [!neden] Neden tek bir VKİ hesabıyla yetinmiyoruz?
+> Tek formüllü bir örnek, kodun bir hesap makinesinden ibaret olduğu izlenimini bırakır. Oysa gerçek bir araçta veri girilir, dönüştürülür, eşiklerle karşılaştırılır, yorumlanır ve bir de kaynağı gösterilir. Beş hesaplamalı bir araç bu akışın tamamını gösterdiği için değişken, tip ve koşul kavramlarının hepsi kendiliğinden ortaya çıkıyor; biz de onları yerinde yakalıyoruz.
 
-Aşağıdaki beş araç, öğrencilikte ve ilk yıllarda en sık ihtiyaç duyulanlardan seçildi. Her birinin altında formül veya puanlama ve kaynak var; canlı gösteride bu ayrıntılar istemin ikinci yarısı olarak modele verilir.
+### Yazdıracağımız beş hesaplama
 
-**1. VKİ ve bel/boy oranı.** VKİ = kilo / boy². WHO sınıfları: 18,5 altı zayıf, 25'e kadar normal, 30'a kadar fazla kilolu, 30 ve üstü obez (I: 30–34,9; II: 35–39,9; III: ≥40). Bel/boy oranı = bel çevresi / boy; 0,5 altı hedef, 0,5–0,59 artmış, 0,6 ve üstü yüksek kardiyometabolik risk. Pratik kural: *bel çevreniz boyunuzun yarısından az olsun*. Neden ikisi birden: VKİ kas kütlesini ve yağ dağılımını ayırt edemez; bel/boy oranı karın yağlanmasını yansıtır ve riski daha iyi öngörür. (WHO 2000; Ashwell & Hsieh 2005; Browning 2010.)
+Beş aracı, öğrenciliğinizde ve hekimliğin ilk yıllarında en sık ihtiyaç duyacaklarınız arasından seçtim. Her birinin ne ölçtüğünü, hangi eşiklerle yorumlandığını ve nereden geldiğini kısaca anlatacağım; canlı gösteride bu ayrıntıları istemin ikinci yarısı olarak modele biz vereceğiz. Bu önemli bir nokta, birazdan döneceğiz.
 
-**2. eGFR, CKD-EPI 2021.** Serum kreatinin, yaş ve cinsiyetten glomerüler filtrasyon hızı tahmini; 2021 denklemi ırk katsayısını kaldırdı. KDIGO evreleri: G1 ≥90, G2 60–89, G3a 45–59, G3b 30–44, G4 15–29, G5 &lt;15 mL/dk/1,73 m². Sınırları: tek ölçüm tanı koydurmaz, kas kütlesi uçlarında ve akut böbrek hasarında güvenilmez. (Inker 2021; KDIGO 2024.)
+**Vücut kitle indeksi ve bel/boy oranı.** VKİ'yi hepiniz biliyorsunuz, kilonun boyun karesine bölümü. Dünya Sağlık Örgütü sınıflaması 18,5'in altını zayıf, 25'e kadarını normal, 30'a kadarını fazla kilolu, 30 ve üzerini de üç basamakta obez olarak tanımlar. Ancak VKİ kas kütlesiyle yağı ayırt edemez ve yağın nerede biriktiğini söylemez. Bel çevresinin boya oranı bu boşluğu doldurur; karın yağlanmasını yansıttığı için kardiyometabolik riski VKİ'den daha iyi öngörür. Akılda kalıcı kural şu: bel çevreniz boyunuzun yarısından az olsun. Oranın 0,5'i geçmesi artmış, 0,6'yı geçmesi yüksek risk anlamına gelir. Aracımız bu ikisini birlikte hesaplayacak, çünkü VKİ'si normal görünen ama beli geniş olan hasta tam da gözden kaçan hastadır. (WHO 2000; Ashwell ve Hsieh 2005; Browning ve ark. 2010.)
 
-**3. CHA₂DS₂-VASc.** Atriyal fibrilasyonda inme riski: kalp yetersizliği 1, hipertansiyon 1, yaş ≥75 2, diyabet 1, inme/GİA 2, vasküler hastalık 1, yaş 65–74 1, kadın cinsiyet 1. ESC 2024 kılavuzu cinsiyet puanını çıkaran CHA₂DS₂-VA'yı önerir: 2 ve üstü antikoagülasyon, 1 puanda bireysel değerlendirme. (Lip 2010; Friberg 2012; ESC 2024.)
+**Tahmini glomerüler filtrasyon hızı.** Serum kreatinini, yaş ve cinsiyetten böbrek fonksiyonunu kestiren CKD-EPI denklemini kullanacağız; 2021 sürümünü, çünkü bu sürüm önceki denklemlerdeki ırk katsayısını kaldırdı. Sonucu KDIGO evreleriyle birlikte okuruz: 90 ve üzeri G1, 60–89 G2, 45–59 G3a, 30–44 G3b, 15–29 G4, 15'in altı G5. Şunu da unutmayın: tek bir kreatinin değeri o andaki fonksiyonu gösterir, kronik böbrek hastalığı tanısı için en az üç ay süren düşüklük gerekir; kas kütlesi çok düşük veya çok yüksek hastalarda ve akut böbrek hasarında denklem güvenilmez. (Inker ve ark. 2021; KDIGO 2024.)
 
-**4. Wells DVT.** On ölçüt, biri eksi puanlı. İki düzeyli yorum: 2 ve üstü "DVT olası"; üç düzeyli: 0 düşük, 1–2 orta, 3 ve üstü yüksek. Sonuca göre D-dimer mi, doğrudan Doppler mi kararı. (Wells 1997, 2003.)
+**CHA₂DS₂-VASc.** Atriyal fibrilasyonu olan hastada inme riskini puanlayan ve antikoagülan kararına yön veren skor. Kalp yetersizliği, hipertansiyon, diyabet ve vasküler hastalık birer puan; 75 yaş ve üzeri ile geçirilmiş inme ikişer puan; 65–74 yaş ve kadın cinsiyet birer puan. Burada güncel bir tartışma var: Avrupa Kardiyoloji Derneği'nin 2024 kılavuzu cinsiyet puanını çıkarıp CHA₂DS₂-VA adıyla sadeleştirdi ve 2 puan ve üzerinde antikoagülasyon önerdi. Aracımız iki skoru da gösterecek; bir hesaplayıcının hangi kılavuzu uyguladığını bilmek, sonucu okumanın parçasıdır. (Lip ve ark. 2010; Friberg ve ark. 2012; ESC 2024.)
 
-**5. mg/kg doz.** Günlük toplam = kilo × mg/kg; doz başına = toplam / günlük doz sayısı; tavan doz aşılırsa uyar; süspansiyon derişimi verilirse mL'ye çevir. Araç hesap yapar, ilaç önermez; prospektüs ve formüler her zaman son sözü söyler.
+**Wells DVT skoru.** Alt ekstremitede derin ven trombozu şüphesinde ön-test olasılığını sınıflar. On ölçütten dokuzu birer puan ekler, "alternatif tanı en az DVT kadar olası" ölçütü ise iki puan düşer. İki düzeyli yorumda 2 ve üzeri "olası", üç düzeyli yorumda 0 düşük, 1–2 orta, 3 ve üzeri yüksek olasılık demektir. Skorun asıl işi tanı koymak değil, bir sonraki adımı söylemektir: düşük olasılıkta D-dimer, yüksek olasılıkta doğrudan Doppler. (Wells ve ark. 1997, 2003.)
 
-> [!uyari] Eğitim aracı, klinik araç değil
-> Yazdıracağımız hesaplayıcı öğrenmek için. Gerçek hasta kararı güncel kılavuz, kurumun onayladığı sistem ve hekim değerlendirmesi ister. Bir aracın "çalışıyor" görünmesi doğru olduğu anlamına gelmez; bugünün ikinci dersi tam olarak bu.
+**Ağırlığa göre doz.** Özellikle pediatride ilaç dozu kilogram başına verilir. Günlük toplam doz kilo ile mg/kg değerinin çarpımı, doz başına miktar da bunun günlük doz sayısına bölümüdür. İyi bir araç tavan dozu aşıldığında uyarır ve süspansiyon derişimi verildiyse miligramı mililitreye çevirir. Burada bir şeyi açıkça söylemek isterim: araç hesap yapar, ilaç önermez; hangi ilacın hangi aralıkta verileceğini prospektüs ve formüler söyler.
 
-### Derste kullanılan istem
+> [!uyari] Eğitim aracıyla klinik araç arasındaki fark
+> Bugün yazdıracağımız hesaplayıcı öğrenmek için. Gerçek bir hasta kararı güncel kılavuzu, kurumun onayladığı sistemi ve sizin değerlendirmenizi gerektirir. Bir aracın çalışır görünmesi doğru olduğu anlamına gelmez; bugünün ikinci büyük dersi de zaten bu olacak.
 
-İstem iki parça hâlinde verilir: önce görev ve biçim, sonra formül ayrıntıları. Öğrenciler için ders: **bağlamı siz verirsiniz, model bilmek zorunda değildir; ama verdiğinizi doğru vermek zorundasınız.**
+### İstemi nasıl kuruyoruz
+
+Şimdi asıl gösteriye geçiyoruz. İstemi iki parça hâlinde vereceğiz. İlk parçada modele ne istediğimizi, hangi biçimde istediğimizi ve hangi kısıtlara uymasını beklediğimizi söyleyeceğiz. İkinci parçada ise yukarıda anlattığım formülleri ve eşikleri tek tek yazacağız.
+
+Neden iki parça? Çünkü öğrenmenizi istediğim şey şu: model bu eşikleri belki biliyor, belki de yarısını doğru hatırlıyor. Bilmesini beklemek yerine biz veriyoruz; bağlamı sağlamak bizim işimiz. Ama verdiğimiz şey doğru olmak zorunda, çünkü model bizim yanlışımızı da aynı özenle koda dökecek. Bu yüzden ikinci parçayı hazırlarken kaynaklara baktım; siz de kendi araçlarınızı yazdırırken aynısını yapmalısınız.
 
 <details>
-<summary>1. parça: görev, biçim, kısıtlar</summary>
+<summary>İstemin ilk parçası: görev, biçim ve kısıtlar</summary>
 
 ```text
 Tıp öğrencileri için Türkçe, tek dosyalık (HTML+CSS+JS, dış bağımlılık yok) bir "Klinik Hesaplayıcı" yap.
@@ -113,7 +119,7 @@ Formül ve eşik ayrıntıları bir sonraki mesajda. Emin olmadığın bir eşik
 </details>
 
 <details>
-<summary>2. parça: formüller ve eşikler</summary>
+<summary>İstemin ikinci parçası: formüller ve eşikler</summary>
 
 ```text
 1) VKİ = kilo(kg) / boy(m)². WHO: <18,5 zayıf; 18,5–24,9 normal; 25–29,9 fazla kilolu; 30–34,9 obez I; 35–39,9 obez II; ≥40 obez III.
@@ -131,73 +137,75 @@ Formül ve eşik ayrıntıları bir sonraki mesajda. Emin olmadığın bir eşik
 ```
 </details>
 
-Bu istemle önceden üretilen ve doğrulanan sürüm sitede: [Klinik Hesaplayıcı](/araclar/klinik-hesaplayici). Canlı gösteride üretilen sürümle karşılaştırmak dersin bir parçası; iki çıktı hiçbir zaman birebir aynı olmaz.
+Aynı istemle önceden ürettiğim ve kaynaklarıyla doğruladığım bir sürüm sitede duruyor: [Klinik Hesaplayıcı](/araclar/klinik-hesaplayici). Derste canlı üretilen sürüm buna birebir benzemeyecek; aynı istemden iki farklı kod çıkması normaldir ve ikisini yan yana koyup farklarına bakmak bu haftanın ödevlerinden biri.
 
-### Bilerek hata: birim karışıklığı
+### Bir hatayı bilerek çıkarıyoruz
 
-Araç hazır olunca VKİ sekmesine boy olarak **1,74** yazıyoruz. İyi bir araç "boy santimetre olmalı" der; demiyorsa VKİ 23 yerine 23.000 çıkar. Kodda `boy` değişkenini bulup soruyoruz: hangi birimde alınıyor, nerede metreye çevriliyor? Sonra ajana düzeltmeyi **biz tarif ediyoruz**: "3'ten küçük girildiyse metre kabul et, santimetreye çevir ve sonuçta belirt." Bu, geçen haftaki `NameError` dersinin devamı: hatayı okuyan, düzeltmeyi doğru isteyebilir.
+Araç hazır olduğunda ilk yapacağımız şey onu bozmaya çalışmak. VKİ sekmesine boy olarak 1,74 yazacağız; yani santimetre yerine metre. İyi yazılmış bir araç burada durup "boy santimetre olmalı" der. Demiyorsa VKİ 23 yerine 23 bin gibi bir sayı görürsünüz ve bu aslında iyi bir ders olur, çünkü kod çalışmış ama yanlış konuşmuştur; yazılımın en sinsi hatası budur.
 
-> [!ornek] Gerçek hayattan
-> Birim karışıklığı yazılım tarihinin en pahalı hatalarından: NASA'nın Mars Climate Orbiter'ı 1999'da bir ekibin İngiliz, diğerinin metrik birim kullanması yüzünden kaybedildi. Klinikte mg/mcg, mL/mg, cm/m karışıklığı ilaç hatalarının klasik nedenidir. Kod bunu sizin yerinize fark etmez; siz söylerseniz kontrol eder.
+Sonra kodda `boy` değişkenini bulup birlikte bakacağız: hangi birimde alınıyor, nerede metreye çevriliyor? Ve düzeltmeyi yapay zekaya biz tarif edeceğiz: "boy 3'ten küçük girildiyse kullanıcı metre yazmış olabilir, santimetreye çevir ve bunu sonuçta belirt." Geçen hafta hata mesajını okumayı konuşmuştuk; bu hafta okuduğumuz hatayı doğru tarif etmeyi ekliyoruz. Bu ikisi birlikte, kodlayan hekimin en temel becerisi.
 
-### Kodu okuma turu: üç durak
+> [!ornek] Birim karışıklığı pahalıya patlar
+> NASA'nın Mars Climate Orbiter uydusu 1999'da, bir ekibin İngiliz, diğerinin metrik birim kullanması yüzünden Mars atmosferinde kayboldu. Klinikte de miligramla mikrogramın, mililitreyle miligramın, santimetreyle metrenin karışması ilaç hatalarının klasik nedenleri arasındadır. Kod bu karışıklığı kendiliğinden fark etmez; siz kontrol etmesini söylerseniz eder.
 
-Üretilen dosyada üç yere bakıyoruz. Bunlar 2. haftanın resmî konusu.
+### Kodu okuyoruz: üç durak
 
-**Durak 1, değişken ve tip.** `const kilo = Number(form.kilo.value)` gibi bir satır. Form alanından gelen değer bir **metin**dir: `"72"`. `Number` onu **sayı** yapar: `72`. Bu dönüşüm olmadan `"72" / "1.74"` bazı dillerde hata, bazılarında saçma bir sonuç verir. Değişken, bir değeri isimle saklayan kutu; tip, kutudaki şeyin türü: sayı, metin, doğru/yanlış.
+Üretilen dosyada üç yerde duracağız. Bu üç durak, ders planındaki "değişkenler ve veri tipleri" konusunun kendisi; sadece tahtada değil, çalışan bir aracın içinde.
 
-**Durak 2, fonksiyon.** `function egfrCkdEpi2021(kreatinin, yas, cinsiyet)`. Parantez içindekiler **parametre**: formülün girdileri. Fonksiyonun sonunda `return` sonucu geri verir. Soru: cinsiyet formüle nerede giriyor? Cevap: κ, α ve kadınlar için 1,012 çarpanı. Python'da aynı şey `def` ile yazılır; defterde göreceğiz.
+İlk durak bir değişken tanımı: `const kilo = Number(form.kilo.value)` gibi bir satır. Buradaki `kilo` bir değişken, yani bir değeri isimle sakladığımız kutu. Ama dikkat edin, form alanından gelen değer aslında bir metin: kullanıcı 72 yazdığında bilgisayar bunu `"72"` diye, tırnak içinde bir yazı olarak alır. `Number` işlevi bu yazıyı sayıya çevirir. Bu dönüşüm olmadan iki metni bölmeye kalkarsanız bazı diller hata verir, bazıları da sessizce saçma bir sonuç üretir. Sayı ile metin arasındaki bu fark, veri tipi dediğimiz şeydir.
 
-**Durak 3, eşik.** `if (egfr >= 60) ... else if (egfr >= 45) ...` zinciri. Klinik sınır değerleri koda böyle girer. Soru: eGFR 59,6 hangi evre? Yuvarlayıp 60 mı diyeceğiz? Kod ne yapıyor, kılavuz ne diyor? Küçük bir `if` sırası, klinik anlam taşır.
+İkinci durak bir fonksiyon: `function egfrCkdEpi2021(kreatinin, yas, cinsiyet)`. Parantez içindekiler fonksiyonun girdileri, yani parametreler; en sondaki `return` da sonucu geri veren satır. Sınıfa soracağım soru şu: cinsiyet formüle nerede giriyor? Cevabı üç ayrı satırda bulacağız, κ ve α katsayılarında ve kadınlar için 1,012 çarpanında. Python'da aynı yapı `def` ile yazılıyor; birazdan defterde göreceğiz.
 
-> [!tanim] Değişken, tip, fonksiyon, koşul
-> **Değişken:** isimli kutu (`kilo`). **Tip:** kutunun içeriğinin türü; sayı (`72`), metin (`"72"`), mantıksal (`true`). **Tip dönüşümü:** `Number("72")`. **Fonksiyon:** isimlendirilmiş, girdi alıp sonuç döndüren kod bloğu (`function` / `def`). **Koşul:** `if` ile eşiklere göre dallanma. Bugün gördüğünüz kodun tamamı bu dört parçadan kurulu.
+Üçüncü durak bir eşik zinciri: `if (egfr >= 60) ... else if (egfr >= 45) ...`. Klinik sınır değerler koda işte böyle giriyor. Buradaki soru daha ince: eGFR 59,6 çıkan hasta hangi evrede? Kod yuvarlamadan önce mi karşılaştırıyor, sonra mı? Kılavuz ne diyor? Birkaç satırlık bir `if` sırasının klinik bir anlam taşıdığını görmenizi istiyorum.
+
+> [!tanim] Bugünün dört kavramı bir arada
+> Değişken, bir değeri isimle saklayan kutudur (`kilo`). Veri tipi, kutunun içindekinin türüdür: sayı, metin ya da doğru/yanlış. Tip dönüşümü, metni sayıya çevirmek gibi bir türden diğerine geçmektir (`Number("72")`). Fonksiyon, isimlendirilmiş ve girdi alıp sonuç döndüren bir kod bloğudur; JavaScript'te `function`, Python'da `def`. Koşul ise `if` ile eşiklere göre dallanmadır. Bugün okuduğunuz kodun tamamı bu dört parçadan kurulu.
 
 ### Aynı fonksiyon Python'da
 
-Tarayıcıdaki araç JavaScript ile yazıldı; ders dili Python. İkisi arasındaki fark yazım, mantık aynı. Aşağıdaki defterde `egfrCkdEpi2021`'in Python karşılığını çalıştırıyor, `def`, parametre ve `return`'ü görüyoruz. Defter kısa tutuldu; bu hafta tek işimiz bu fonksiyonu okuyup anlamak.
+Tarayıcıda çalışan araç JavaScript ile yazıldı, çünkü tarayıcılar o dili konuşur; dersin geri kalanında ise Python kullanacağız. İkisi arasındaki fark büyük ölçüde yazımda, mantık aynı. Aşağıdaki defterde `egfrCkdEpi2021` fonksiyonunun Python karşılığını çalıştırıyoruz ve `def`, parametre, `return` ve `if` yapılarını bu kez Python yazımıyla görüyoruz. Defteri bilerek kısa tuttum; bu hafta tek işimiz bu fonksiyonu okuyup anlamak. Sonundaki VKİ ve bel/boy alıştırmasını da evde tamamlayın; cevabı hemen altında, kapalı bir kutuda duruyor, önce kendiniz deneyin.
 
 <NotebookEmbed file="notebooks/hafta-02.ipynb" title="Hafta 2 · eGFR fonksiyonu" />
 
 ### Kapanış: kaynağa bağlı yapay zeka
 
-Son beş dakika NotebookLM: 1. ve 2. hafta sayfalarını ve bir kılavuz özetini kaynak olarak yükleyip "bu kaynaklardan 5 soruluk quiz yap, her sorunun altına kaynağını yaz" diyoruz. Sohbet botundan farkı: yalnızca yüklediğiniz belgeden cevap verir, kaynağı gösterir, uydurma payı düşer. Ders çalışma aracınız da bu; 24. haftada ayrıntılı işleyeceğiz.
+Son beş dakikada size başka türlü bir araç göstereceğim. NotebookLM'e birinci ve ikinci haftanın sayfalarını ve bir kılavuz özetini kaynak olarak yükleyip "bu kaynaklardan beş soruluk bir quiz hazırla, her sorunun altına kaynağını yaz" diyeceğiz. Sohbet botlarından farkı şu: yalnızca sizin yüklediğiniz belgelerden cevap verir ve hangi sayfadan aldığını gösterir; uydurma payı bu yüzden çok daha düşük. Ders çalışırken kullanabileceğiniz bir araç bu; ayrıntısını 24. haftada konuşacağız.
 
 ## Temel Kavramlar
 
-- **İstem (prompt)** — Modele verilen görev, bağlam ve kısıt metni. İyi istem: rol, bağlam, görev, çıktı biçimi, kısıt.
-- **Vibe coding** — Kodu satır satır yazmak yerine yapay zekaya tarif edip üretilen kodu okuyarak, test ederek ve düzelttirerek ilerleme. Hekimlik için sorumlu hâli: çıktıyı doğrulamadan kullanmamak.
+- **İstem (prompt)** — Modele verdiğimiz görev, bağlam ve kısıt metni. İyi bir istem rolü, bağlamı, görevi, çıktı biçimini ve kısıtları içerir.
+- **Vibe coding** — Kodu satır satır yazmak yerine yapay zekaya tarif edip üretilen kodu okuyarak, deneyerek ve düzelttirerek ilerleme. Hekimlik için sorumlu hâli, çıktıyı doğrulamadan kullanmamaktır.
 - **Değişken** — Bir değeri isimle saklayan kutu: `kilo = 72`.
-- **Veri tipi** — Değerin türü: tam sayı, ondalık, metin, mantıksal. `"72"` metin, `72` sayıdır.
-- **Tip dönüşümü** — Metni sayıya çevirme: `Number("72")` (JavaScript), `float("72")` (Python). Girdi alanlarından gelen her şey metindir.
-- **Fonksiyon** — İsimli, girdi alan, sonuç döndüren kod bloğu. JavaScript'te `function`, Python'da `def`.
-- **Koşul (`if`)** — Eşiklere göre dallanma; klinik sınır değerleri koda buradan girer.
-- **Birim hatası** — Girdinin beklenenden farklı birimde olması (cm/m, mg/dL/µmol/L). En sık ve en tehlikeli hata sınıfı.
+- **Veri tipi** — Değerin türü: tam sayı, ondalık sayı, metin, mantıksal. `"72"` bir metin, `72` bir sayıdır.
+- **Tip dönüşümü** — Metni sayıya çevirmek: JavaScript'te `Number("72")`, Python'da `float("72")`. Form alanlarından gelen her şey metin olarak gelir.
+- **Fonksiyon** — İsimli, girdi alan ve sonuç döndüren kod bloğu. JavaScript'te `function`, Python'da `def`.
+- **Koşul (`if`)** — Eşiklere göre dallanma; klinik sınır değerler koda buradan girer.
+- **Birim hatası** — Girdinin beklenenden farklı birimde olması. En sık görülen ve en tehlikeli hata sınıflarından biri.
 
 ## Tıptan Örnekler
 
-- **eGFR'nin ırksız denklemi:** 2021'de CKD-EPI'den ırk katsayısı çıkarıldı; aynı kreatininle bazı hastaların evresi değişti ve nakil listeleri güncellendi. Bir formüldeki tek katsayı, binlerce hastanın kararını etkiler.
-- **CHA₂DS₂-VASc'tan CHA₂DS₂-VA'ya:** ESC 2024 cinsiyet puanını kaldırdı. Hesaplayıcınız hangi kılavuzu uyguluyor? Kod, kılavuz güncellenince güncellenmeli; "çalışıyor" görünmesi yetmez.
-- **Birim karışıklığı:** Pediatrik doz hesabında mg ve mL karışıklığı, süspansiyon derişimi yanlış okununca 5 kat doz hatasına yol açabilir. Araçtaki "tavan doz" uyarısı bu yüzden var.
-- **Wells + D-dimer:** Skor tek başına tanı koymaz; düşük olasılıkta negatif D-dimer DVT'yi dışlar, yüksek olasılıkta doğrudan görüntüleme gerekir. Araç bu algoritmayı yorum satırında verir.
+- CKD-EPI denkleminden 2021'de ırk katsayısı çıkarıldığında, aynı kreatinin değeriyle bazı hastaların evresi değişti ve nakil bekleme listeleri yeniden düzenlendi. Bir formüldeki tek bir katsayı, binlerce hastanın kararını etkileyebiliyor.
+- ESC'nin 2024 kılavuzu CHA₂DS₂-VASc'taki cinsiyet puanını kaldırdı. Kullandığınız hesaplayıcı hangi sürümü uyguluyor? Kılavuz değişince kodun da değişmesi gerekir; çalışır görünmesi yeterli değil.
+- Pediatrik doz hesabında süspansiyon derişimi yanlış okunduğunda miligram ile mililitre karışır ve birkaç kat doz hatası ortaya çıkabilir. Aracımızdaki tavan doz uyarısı bu yüzden var.
+- Wells skoru tek başına tanı koymaz. Düşük olasılıkta negatif D-dimer DVT'yi dışlar; yüksek olasılıkta ise D-dimer beklemeden görüntülemeye gidilir. Araç bu algoritmayı yorum satırında hatırlatır.
 
 ## Uygulama / Etkinlik
 
-1. Derste üretilen sürümle sitedeki [hazır sürümü](/araclar/klinik-hesaplayici) karşılaştırın: aynı istemden çıkan iki kodda hangi farklar var? En az iki fark yazın.
-2. Hazır sürümün kodunu açın ([Kodu oku](https://github.com/drferhatu/yapay-zeka-ve-saglik/blob/main/public/araclar/klinik-hesaplayici.html)) ve üç durağı bulun: bir `Number(...)` dönüşümü, `egfrCkdEpi2021` fonksiyonu, `kdigoEvresi` içindeki `if` zinciri.
-3. Defterdeki `egfr_hesapla` fonksiyonunu üç farklı hasta için çağırın; birinde kreatinini µmol/L girin ve ne olduğunu gözleyin.
-4. Kendi istem denemeniz (isteğe bağlı): Herhangi bir sohbet aracına 1. parça istemi verin, yalnızca VKİ sekmesini isteyin. Çıkan kodda `if` eşiklerini bulup WHO sınıflarıyla karşılaştırın. Yanlış eşik var mı?
+1. Derste canlı üretilen sürümle sitedeki [hazır sürümü](/araclar/klinik-hesaplayici) yan yana açın. Aynı istemden çıkan iki kodda en az iki fark bulun ve yazın.
+2. Hazır sürümün kodunu [GitHub'da açın](https://github.com/drferhatu/yapay-zeka-ve-saglik/blob/main/public/araclar/klinik-hesaplayici.html) ve üç durağı kendiniz bulun: bir `Number(...)` dönüşümü, `egfrCkdEpi2021` fonksiyonu ve `kdigoEvresi` içindeki `if` zinciri.
+3. Defterdeki `egfr_hesapla` fonksiyonunu üç farklı hasta için çağırın. Birinde kreatinini µmol/L olarak girin ve ne olduğunu gözleyin.
+4. İsterseniz kendi istem denemenizi yapın: herhangi bir sohbet aracına istemin ilk parçasını verin ama yalnızca VKİ sekmesini isteyin. Çıkan kodda `if` eşiklerini bulup WHO sınıflarıyla karşılaştırın; yanlış bir eşik var mı?
 
-> [!not] Ev çalışması (15 dk)
-> Hazır hesaplayıcıda bir hata ya da eksik bulun: yanlış eşik, kötü uyarı, eksik sınırlılık. Bulduğunuzu ve nasıl düzeltilmesi gerektiğini bir cümleyle WhatsApp kanalına değil, derse getirin; 3. haftada birlikte düzelttireceğiz.
+> [!not] Haftaya getirmeniz için
+> Hazır hesaplayıcıda bir hata ya da eksik bulmaya çalışın: yanlış bir eşik, yetersiz bir uyarı, unutulmuş bir sınırlılık. Ne bulduğunuzu ve nasıl düzeltilmesi gerektiğini bir cümleyle yazıp derse getirin. Üçüncü haftada bu önerileri birlikte yapay zekaya düzelttireceğiz; kendi bulduğunuz hatanın düzeltildiğini görmek, kodu okumayı öğrenmenin en iyi yolu.
 
 ## Tartışma Soruları
 
-1. İstemin 2. parçasını (formüller) vermeseydik model eşikleri kendisi bulurdu. Bu neden riskli? Hangi durumda kabul edilebilir olurdu?
-2. Kod "çalışıyor" ve sonuç makul görünüyor. Yine de doğru olmadığına nasıl ikna olursunuz? Hangi üç test ederdiniz?
-3. Hesaplayıcıyı serviste kullanan bir stajyer yanlış sonuçla doz verirse sorumluluk kimde: yazan model, isteyen öğrenci, onaylayan öğretim üyesi, kullanan stajyer?
-4. Değişkenin tipini bilmek hekim için neden önemli? Bir metinle bir sayıyı karıştırmanın klinik karşılığı ne olabilir?
+1. İstemin ikinci parçasını, yani formülleri vermeseydik model eşikleri kendisi bulmaya çalışırdı. Bu neden riskli olurdu? Hangi durumlarda buna razı olabilirdiniz?
+2. Kod çalışıyor ve sonuç makul görünüyor. Yine de doğru olmadığından şüphelenseniz hangi üç şeyi test ederdiniz?
+3. Hesaplayıcıyı serviste kullanan bir stajyer yanlış sonuçla doz verirse sorumluluk kimde olur: kodu yazan model mi, isteyen öğrenci mi, onaylayan öğretim üyesi mi, kullanan stajyer mi?
+4. Bir değişkenin tipini bilmek hekim için neden önemli olabilir? Bir metinle bir sayıyı karıştırmanın klinikteki karşılığı ne olurdu?
 
 ## Haftanın Özeti
 
-Kod yazmayı bilmeyen bir hekim kod yazdırabilir; ama ne istediğini klinik ayrıntısıyla söylemeli, çıkan kodu okuyabilmeli ve hatasını tarif edebilmeli. Beş hesaplamalı bir aracı tek istemle yazdırdık, bir birim hatasını bilerek çıkarıp düzelttirdik ve kodda üç durakta değişken, tip dönüşümü, fonksiyon ve `if` eşiğini okuduk. Aynı fonksiyonu Python'da `def` ile çalıştırdık. Araç sitede; kullanın, hata bulun, getirin.
+Bu hafta kod yazmayı bilmeyen bir hekimin de kod yazdırabileceğini gördük; ama bunun için ne istediğini klinik ayrıntısıyla söylemesi, çıkan kodu okuyabilmesi ve bulduğu hatayı doğru tarif edebilmesi gerektiğini de gördük. Beş hesaplamalı bir aracı tek bir istemle yazdırdık, içine bilerek bir birim hatası sokup düzelttirdik ve kodda üç durakta değişkeni, tip dönüşümünü, fonksiyonu ve `if` eşiğini tanıdık. Sonra aynı fonksiyonu Python'da `def` ile çalıştırdık. Araç artık sitede; kullanın, hatasını bulun, haftaya getirin.

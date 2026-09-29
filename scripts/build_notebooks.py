@@ -354,6 +354,26 @@ md("""## Bugün ne okuduk?
 
 **Eve:** Bölüm 6'yı tamamlayın; kendi VKİ ve bel/boy oranınızı hesaplayın (sonucu paylaşmak zorunda değilsiniz).
 """),
+md("""<details>
+<summary><b>Bölüm 6'nın cevabı</b> — önce kendiniz deneyin, sonra açın</summary>
+
+```python
+def vki(kilo, boy_m):
+    \"\"\"Vücut kitle indeksi (kg/m²).\"\"\"
+    return kilo / boy_m ** 2
+
+
+def bel_boy(bel_cm, boy_cm):
+    \"\"\"Bel/boy oranı; < 0.5 hedef.\"\"\"
+    return bel_cm / boy_cm
+
+
+print(round(vki(72, 1.74), 1))      # 23.8
+print(round(bel_boy(88, 174), 2))   # 0.51
+```
+
+İki noktaya dikkat: `boy_m ** 2` ifadesi boyun karesi (Python'da üs alma `**` ile yazılır) ve iki fonksiyonda boy farklı birimde. Birinde metre, diğerinde santimetre; parametre adlarına bunu bilerek yazdık. Aynı hastada VKİ normal sınırda çıkarken bel/boy oranının 0,5'i geçmesi, derste konuştuğumuz "normal kilolu santral obezite" durumunun ta kendisidir.
+</details>"""),
 ]
 
 NOTEBOOKS = {"hafta-01": ("Hafta 1 · İlk Kod", WEEK01), "hafta-02": ("Hafta 2 · eGFR fonksiyonu", WEEK02)}

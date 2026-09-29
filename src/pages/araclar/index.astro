@@ -10,8 +10,8 @@ const tools = [
 ---
 <BaseLayout title="Araçlar" description="Derste üretken yapay zekaya yazdırılan ve doğrulanan, tıp öğrencisinin işine yarayan küçük araçlar.">
   <div class="wrap py-14 md:py-20">
-    <SectionHeading eyebrow="Araçlar" title="Derste kodlattığımız araçlar"
-      lede="Her biri bir derste, tek bir istemle üretken yapay zekaya yazdırıldı; formülleri ve kaynakları öğretim üyesi doğruladı. Kodu okumak serbest, hatta ödev." />
+    <SectionHeading eyebrow="Araçlar" title="Derste birlikte yazdırdığımız araçlar"
+      lede="Bu sayfadaki araçların her birini bir ders saatinde, birlikte yazdığımız bir istemle yapay zekaya yazdırdık; formüllerini ve kaynaklarını ders öncesinde doğruladım. Kullanmanız için buradalar, ama kodlarını açıp okumanızı da isterim; derste tam olarak bunu öğreniyoruz." />
   </div>
   <div class="wrap pb-24">
     <ul class="grid gap-5 md:grid-cols-2">
@@ -27,6 +27,6 @@ const tools = [
         </li>
       ))}
     </ul>
-    <p class="mt-10 text-sm text-ink-3">Araçlar eğitim amaçlıdır; klinik karar için güncel kılavuz ve hekim değerlendirmesi gerekir. Nasıl yazdırıldığını görmek için <a class="link" href={weekHref(2)}>2. haftaya</a> bakın.</p>
+    <p class="mt-10 text-sm text-ink-3">Bu araçlar öğrenmek için hazırlandı; gerçek bir hasta kararı güncel kılavuzu ve hekimin değerlendirmesini gerektirir. Nasıl yazdırıldığını görmek için <a class="link" href={weekHref(2)}>2. haftaya</a> bakın.</p>
   </div>
 </BaseLayout>

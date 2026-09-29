@@ -24,10 +24,10 @@
   section.panel[data-active]{display:block}
   .panel h2{margin:0 0 4px;font-size:22px}
   .lede{margin:0 0 18px;color:var(--ink2);font-size:15px}
-  form{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-  label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+  form{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));align-items:end}
+  label{display:flex;flex-direction:column;justify-content:flex-end;gap:6px;font-size:14px;font-weight:600}
   label span.hint{font-weight:400;color:var(--ink3);font-size:12px}
-  input,select{font:inherit;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:#fff;color:var(--ink)}
+  input,select{font:inherit;height:44px;padding:0 12px;border:1px solid var(--line2);border-radius:10px;background:#fff;color:var(--ink);width:100%}
   input:focus,select:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
   fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;grid-column:1/-1}
   legend{font-size:13px;font-weight:700;color:var(--ink3);padding:0 6px}
