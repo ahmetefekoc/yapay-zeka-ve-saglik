@@ -157,7 +157,7 @@
     <p class="lede">Özellikle pediatride ilaç dozu kilograma göre verilir. Günlük toplam dozu, doz başına miktarı ve süspansiyon hacmini hesaplar.</p>
     <form id="form-doz">
       <label>Ağırlık <span class="hint">kg</span><input name="kilo" type="number" step="0.1" min="0.5" max="300" required placeholder="18"></label>
-      <label>Doz <span class="hint">mg/kg/gün</span><input name="mgkg" type="number" step="0.1" min="0.01" max="500" required placeholder="50"></label>
+      <label>Doz <span class="hint">mg/kg/gün</span><input name="mgkg" type="number" step="any" min="0.01" max="500" required placeholder="50"></label>
       <label>Günde kaç doz<select name="bolme"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
       <label>Günlük tavan doz <span class="hint">mg, isteğe bağlı</span><input name="tavan" type="number" step="1" min="1" placeholder="3000"></label>
       <label>Süspansiyon derişimi <span class="hint">mg / 5 mL, isteğe bağlı</span><input name="deris" type="number" step="1" min="1" placeholder="250"></label>
