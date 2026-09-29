@@ -1,8 +1,8 @@
 ---
 import type { MarkdownHeading } from 'astro';
-interface Props { headings: MarkdownHeading[]; extra?: { slug: string; text: string }[]; }
-const { headings, extra = [] } = Astro.props;
-const items = [...extra, ...headings.filter((h) => h.depth === 2).map((h) => ({ slug: h.slug, text: h.text }))];
+interface Props { headings: MarkdownHeading[]; extra?: { slug: string; text: string }[]; after?: { slug: string; text: string }[]; }
+const { headings, extra = [], after = [] } = Astro.props;
+const items = [...extra, ...headings.filter((h) => h.depth === 2).map((h) => ({ slug: h.slug, text: h.text })), ...after];
 ---
 {items.length > 0 && (
   <nav aria-label="Bu sayfada" class="text-sm">

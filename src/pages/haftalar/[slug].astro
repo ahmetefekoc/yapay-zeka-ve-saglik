@@ -4,6 +4,7 @@ import Toc from '@/components/Toc.astro';
 import WeekPager from '@/components/WeekPager.astro';
 import ModuleChip from '@/components/ModuleChip.astro';
 import NotebookEmbed from '@/components/NotebookEmbed.astro';
+import WeekReadings from '@/components/WeekReadings.astro';
 import { render } from 'astro:content';
 import { getWeeksSorted, moduleOf, moduleColorVar, scheduleOf, formatDate, STATUS_LABEL, href, weekSlug } from '@/lib/site';
 
@@ -21,6 +22,7 @@ const s = scheduleOf(week.data.week);
 const dateLong = formatDate(s?.date, true);
 const statusLabel = s && s.status !== 'normal' ? STATUS_LABEL[s.status] : '';
 const tocExtra = [{ slug: 'ogrenme-hedefleri', text: 'Öğrenme hedefleri' }, ...(week.data.notebook ? [{ slug: 'defter', text: 'Colab defteri' }] : [])];
+const tocAfter = (week.data.article || week.data.discussion) ? [{ slug: 'okumalar', text: 'Bu haftanın okumaları' }] : [];
 const pageTitle = `Hafta ${week.data.week} — ${week.data.title}`;
 ---
 <BaseLayout title={pageTitle} description={week.data.description} ogType="article">
@@ -71,6 +73,8 @@ const pageTitle = `Hafta ${week.data.week} — ${week.data.title}`;
 
       {week.data.notebook && week.data.notebook.placement === 'auto' && <NotebookEmbed {...week.data.notebook} />}
 
+      <WeekReadings article={week.data.article} discussion={week.data.discussion} week={week.data.week} />
+
       {week.data.tools.length > 0 && (
         <section>
           <h2 id="yapay-zeka-araclari">Bu haftanın araçları</h2>
@@ -93,7 +97,7 @@ const pageTitle = `Hafta ${week.data.week} — ${week.data.title}`;
 
     <aside class="hidden lg:block">
       <div class="sticky top-24 space-y-8">
-        <Toc headings={headings} extra={tocExtra} />
+        <Toc headings={headings} extra={tocExtra} after={tocAfter} />
         <div class="rounded-xl border border-line bg-white p-4 text-sm">
           <p class="eyebrow mb-2">Modül</p>
           <p class="font-semibold text-ink">{m.title}</p>

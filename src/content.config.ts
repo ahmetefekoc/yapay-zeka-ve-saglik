@@ -1,6 +1,21 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+/** Haftanın makalesi / tartışması için ortak yapı */
+const reading = z.object({
+  title: z.string(),
+  authors: z.string(),
+  source: z.string(),            // dergi/platform, cilt, sayfa
+  year: z.number().int(),
+  url: z.string().url(),
+  doi: z.string().optional(),
+  kind: z.string().optional(),   // ör. "Derleme", "Blog yazısı", "Görüş"
+  summary: z.array(z.string()),  // paragraflar
+  whyRead: z.string(),           // bu hafta neden bu metin
+  questions: z.array(z.string()).default([]),
+  notebooklm: z.string().optional(), // NotebookLM'e verilecek istem
+});
+
 const weeks = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './content/weeks' }),
   schema: z.object({
@@ -32,6 +47,9 @@ const weeks = defineCollection({
     resources: z
       .array(z.object({ title: z.string(), url: z.string().url(), note: z.string().optional() }))
       .default([]),
+    // Haftanın makalesi ve haftanın tartışması (isteğe bağlı)
+    article: reading.optional(),
+    discussion: reading.optional(),
   }),
 });
 

@@ -120,6 +120,27 @@ import NotebookEmbed from '@/components/NotebookEmbed.astro';
 
 `placement: auto` (varsayılan) ise defter, notların bittiği yere sayfa tarafından eklenir.
 
+### Haftanın makalesi ve haftanın tartışması
+
+Frontmatter'a `article:` ve/veya `discussion:` bloğu ekleyin; sayfa "Bu haftanın okumaları" bölümünü kendisi oluşturur (bkz. `hafta-02.mdx`):
+
+```yaml
+article:
+  title: "..."
+  authors: "..."
+  source: "N Engl J Med 2025;393:786-797"
+  year: 2025
+  url: "https://..."
+  doi: "10.1056/..."          # isteğe bağlı
+  kind: "Derleme"             # isteğe bağlı etiket
+  summary:                    # paragraflar
+    - "..."
+  whyRead: "Bu hafta neden bu metin?"
+  questions: ["...", "..."]   # okurken düşünülecek sorular
+  notebooklm: |               # NotebookLM'e yapıştırılacak istem
+    ...
+```
+
 ### Haftaların tarihini değiştirmek, tatil veya erteleme işlemek
 
 `content/data/schedule.json` içindeki ilgili satırı düzenleyin:
