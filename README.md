@@ -120,6 +120,17 @@ import NotebookEmbed from '@/components/NotebookEmbed.astro';
 
 `placement: auto` (varsayılan) ise defter, notların bittiği yere sayfa tarafından eklenir.
 
+### Faydalı bağlantılar (isteğe bağlı)
+
+Bulduğunuz haftalarda frontmatter'a ekleyin; yoksa bölüm hiç görünmez:
+
+```yaml
+links:
+  - title: "Site adı"
+    url: "https://..."
+    note: "Neden bakmaya değer, bir iki cümle."
+```
+
 ### Haftanın makalesi ve haftanın tartışması
 
 Frontmatter'a `article:` ve/veya `discussion:` bloğu ekleyin; sayfa "Bu haftanın okumaları" bölümünü kendisi oluşturur (bkz. `hafta-02.mdx`):

@@ -47,6 +47,10 @@ const weeks = defineCollection({
     resources: z
       .array(z.object({ title: z.string(), url: z.string().url(), note: z.string().optional() }))
       .default([]),
+    // Faydalı bağlantılar: bulunduğu haftalarda görünür (isteğe bağlı)
+    links: z
+      .array(z.object({ title: z.string(), url: z.string().url(), note: z.string().optional() }))
+      .default([]),
     // Haftanın makalesi ve haftanın tartışması (isteğe bağlı)
     article: reading.optional(),
     discussion: reading.optional(),
